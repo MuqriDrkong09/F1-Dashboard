@@ -92,6 +92,21 @@ Current integration uses:
   - Recharts increased bundle size and triggered a warning.
   - Application still builds successfully; future optimization can include lazy-loading chart routes/components.
 
+## Run Locally
+
+```bash
+npm.cmd install
+npm.cmd run dev
+```
+
+Then open `http://localhost:5173`.
+
+Run tests with coverage (enforces thresholds from `jest.config.cjs`):
+
+```bash
+npm.cmd run test:coverage
+```
+
 ## Progress Checklist
 
 ### Done
@@ -112,12 +127,20 @@ Current integration uses:
 - [x] Hardcoded data removed from key pages and replaced by API-driven content
 - [x] Loading and error states added on API-backed pages
 - [x] Jest testing setup completed and test suites passing
+- [x] Tests for newer pages (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`)
+- [x] Coverage report and threshold enforcement (`npm.cmd run test:coverage`)
 
 ### Not Done Yet
 
-- [ ] Historical stats across multiple seasons
-- [ ] Tests for newer pages (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`)
-- [ ] Coverage report and threshold enforcement
+- [ ] Session list per race UI (`meetings -> sessions`)
+- [ ] Team-driver mapping view (`drivers?session_key=` + `championship_teams`)
+- [ ] Driver points progression across multiple races/sessions
+- [ ] Constructor points progression graph across sessions
+- [ ] Lap/position charts for race analysis
+- [ ] Circuit info panel with richer track metadata
+- [ ] Global filters (season / driver / team / circuit)
+- [ ] Search functionality for drivers/teams
+- [ ] Tooltips/popups with richer driver/team details
 - [ ] Bundle optimization via lazy loading/code splitting
 
 ### UI/Animation Enhancements (Later)
@@ -131,12 +154,3 @@ Current integration uses:
 - [ ] Add animated active nav indicator
 - [ ] Add animated number count-up for dashboard metrics
 - [ ] Add dark/light theme toggle with persistence
-
-## Run Locally
-
-```bash
-npm.cmd install
-npm.cmd run dev
-```
-
-Then open `http://localhost:5173`.

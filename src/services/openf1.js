@@ -1,7 +1,35 @@
 const OPENF1_BASE_URL = "https://api.openf1.org/v1";
 
-async function fetchOpenF1(path, signal) {
+function delay(ms, signal) {
+  if (signal?.aborted) {
+    return Promise.reject(new DOMException("Aborted", "AbortError"));
+  }
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(id);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    const id = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+async function fetchOpenF1(path, signal, attempt = 0) {
+  const maxAttempts = 5;
   const response = await fetch(`${OPENF1_BASE_URL}${path}`, { signal });
+
+  if (response.status === 429 && attempt < maxAttempts - 1) {
+    const retryAfter = response.headers.get("Retry-After");
+    const retrySec = retryAfter ? Number.parseInt(retryAfter, 10) : Number.NaN;
+    const waitMs = Number.isFinite(retrySec)
+      ? retrySec * 1000
+      : Math.min(500 * 2 ** attempt, 8000);
+    await delay(waitMs, signal);
+    return fetchOpenF1(path, signal, attempt + 1);
+  }
 
   if (!response.ok) {
     throw new Error(`OpenF1 request failed (${response.status}) for ${path}`);

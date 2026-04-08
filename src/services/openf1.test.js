@@ -52,6 +52,27 @@ describe("openf1 service", () => {
     );
   });
 
+  it("retries once on 429 then succeeds", async () => {
+    jest.useFakeTimers();
+    const headers429 = { get: () => null };
+    fetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        headers: headers429,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+    const promise = getMeetingsByYear(2024);
+    await jest.runAllTimersAsync();
+    await expect(promise).resolves.toEqual([]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+  });
+
   it("normalizes non-array responses to arrays where expected", async () => {
     fetch.mockResolvedValue({
       ok: true,
