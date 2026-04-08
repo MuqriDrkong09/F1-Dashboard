@@ -92,6 +92,35 @@ Current integration uses:
   - Recharts increased bundle size and triggered a warning.
   - Application still builds successfully; future optimization can include lazy-loading chart routes/components.
 
+## Progress Checklist
+
+### Done
+
+- [x] Vite + React project setup completed
+- [x] UI migrated to MUI
+- [x] Core pages implemented (`Dashboard`, `Drivers`, `Constructors`, `Races`)
+- [x] Extra pages implemented (`CountdownTimer`, `DriverProfiles`, `RaceResults`)
+- [x] OpenF1 service layer added in `src/services/openf1.js`
+- [x] Endpoints integrated:
+  - [x] `meetings?year=`
+  - [x] `meeting?meeting_key=`
+  - [x] `sessions?meeting_key=`
+  - [x] `drivers?session_key=`
+  - [x] `championship_drivers?session_key=latest`
+  - [x] `championship_teams?session_key=...`
+  - [x] `session_result?session_key=...`
+- [x] Hardcoded data removed from key pages and replaced by API-driven content
+- [x] Loading and error states added on API-backed pages
+- [x] Jest testing setup completed and test suites passing
+
+### Not Done Yet
+
+- [ ] Head-to-head comparison page (`drivers` + `session_result`)
+- [ ] Historical stats across multiple seasons
+- [ ] Tests for newer pages (`CountdownTimer`, `DriverProfiles`, `RaceResults`)
+- [ ] Coverage report and threshold enforcement
+- [ ] Bundle optimization via lazy loading/code splitting
+
 ## Run Locally
 
 ```bash
