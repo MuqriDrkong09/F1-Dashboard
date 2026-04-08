@@ -17,6 +17,7 @@ import Races from "./pages/Races";
 import CountdownTimer from "./pages/CountdownTimer";
 import DriverProfiles from "./pages/DriverProfiles";
 import RaceResults from "./pages/RaceResults";
+import HeadToHeadComparison from "./pages/HeadToHeadComparison";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard" },
@@ -26,6 +27,7 @@ const navItems = [
   { to: "/countdown", label: "Countdown" },
   { to: "/profiles", label: "Profiles" },
   { to: "/results", label: "Results" },
+  { to: "/head-to-head", label: "Head-to-Head" },
 ];
 
 export default function App() {
@@ -106,6 +108,7 @@ export default function App() {
         <Route path="/countdown" element={<CountdownTimer />} />
         <Route path="/profiles" element={<DriverProfiles />} />
         <Route path="/results" element={<RaceResults />} />
+        <Route path="/head-to-head" element={<HeadToHeadComparison />} />
       </Routes>
     </Box>
   );

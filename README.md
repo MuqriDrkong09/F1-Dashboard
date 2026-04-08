@@ -99,7 +99,7 @@ Current integration uses:
 - [x] Vite + React project setup completed
 - [x] UI migrated to MUI
 - [x] Core pages implemented (`Dashboard`, `Drivers`, `Constructors`, `Races`)
-- [x] Extra pages implemented (`CountdownTimer`, `DriverProfiles`, `RaceResults`)
+- [x] Extra pages implemented (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`)
 - [x] OpenF1 service layer added in `src/services/openf1.js`
 - [x] Endpoints integrated:
   - [x] `meetings?year=`
@@ -115,11 +115,22 @@ Current integration uses:
 
 ### Not Done Yet
 
-- [ ] Head-to-head comparison page (`drivers` + `session_result`)
 - [ ] Historical stats across multiple seasons
-- [ ] Tests for newer pages (`CountdownTimer`, `DriverProfiles`, `RaceResults`)
+- [ ] Tests for newer pages (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`)
 - [ ] Coverage report and threshold enforcement
 - [ ] Bundle optimization via lazy loading/code splitting
+
+### UI/Animation Enhancements (Later)
+
+- [ ] Add route transitions (fade/slide) between pages
+- [ ] Add stronger card hover depth and subtle scale effects
+- [ ] Add skeleton loaders to all API-backed pages
+- [ ] Add sticky table headers for standings/results tables
+- [ ] Add podium styling (gold/silver/bronze) in `RaceResults`
+- [ ] Add countdown urgency states (green/amber/red + pulse near start)
+- [ ] Add animated active nav indicator
+- [ ] Add animated number count-up for dashboard metrics
+- [ ] Add dark/light theme toggle with persistence
 
 ## Run Locally
 
