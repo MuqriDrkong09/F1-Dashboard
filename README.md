@@ -137,13 +137,6 @@ npm.cmd run test:coverage
 - [x] Tooltips/popups with richer driver/team details (`DriverRichSummary` / `TeamRichSummary` on standings, race results, constructors, line-ups, head-to-head, profiles)
 - [x] Bundle optimization via lazy loading/code splitting (`React.lazy` per route in `App.jsx`, `Suspense` + `PageRouteFallback`)
 
-### Media Feature Checklist
-
-- [ ] Media gallery page (images + videos)
-- [ ] Embedded video section (official/allowed sources)
-- [ ] Accessibility basics (alt text + captions)
-- [ ] Media performance basics (lazy loading + optimized file sizes)
-
 ### UI/Animation Enhancements (Later)
 
 - [ ] Add skeleton loaders to all API-backed pages

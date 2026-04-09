@@ -1,6 +1,13 @@
 import { lazy, Suspense, useState } from "react";
 import { keyframes } from "@mui/material/styles";
-import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import {
+  Link as RouterLink,
+  NavLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -60,22 +67,54 @@ export default function App() {
         sx={{ borderBottom: 1, borderColor: "divider", backdropFilter: "blur(8px)" }}
       >
         <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ minHeight: 64 }}>
+          <Toolbar disableGutters sx={{ minHeight: 64, gap: 1 }}>
             <Typography
               variant="subtitle2"
-              sx={{ letterSpacing: 3, textTransform: "uppercase", color: "primary.main", fontWeight: 700 }}
+              component={RouterLink}
+              to="/dashboard"
+              sx={{
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                color: "primary.main",
+                fontWeight: 700,
+                textDecoration: "none",
+                flexShrink: 0,
+                "&:hover": { opacity: 0.92 },
+                "&:focus-visible": {
+                  outline: 2,
+                  outlineColor: "primary.main",
+                  outlineOffset: 4,
+                  borderRadius: 1,
+                },
+              }}
             >
               F1 Dashboard
             </Typography>
 
-            <Box sx={{ ml: "auto", display: { xs: "none", md: "flex" }, gap: 1 }}>
+            <Box
+              component="nav"
+              aria-label="Main pages"
+              sx={{
+                ml: "auto",
+                display: { xs: "none", md: "flex" },
+                flexWrap: "wrap",
+                justifyContent: "flex-end",
+                gap: 0.5,
+                rowGap: 0.75,
+                maxWidth: { md: "min(100%, 720px)", lg: "none" },
+              }}
+            >
               {navItems.map((item) => (
                 <Button
                   key={item.to}
                   component={NavLink}
                   to={item.to}
+                  size="small"
                   sx={{
                     color: "text.secondary",
+                    whiteSpace: "nowrap",
+                    px: 1.25,
+                    py: 0.5,
                     "&.active": {
                       color: "common.white",
                       bgcolor: "primary.main",
@@ -88,6 +127,10 @@ export default function App() {
             </Box>
 
             <IconButton
+              type="button"
+              aria-label="Open navigation menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="app-mobile-nav"
               onClick={() => setIsMenuOpen(true)}
               sx={{ ml: "auto", display: { xs: "inline-flex", md: "none" }, color: "text.secondary" }}
             >
@@ -97,8 +140,19 @@ export default function App() {
         </Container>
       </AppBar>
 
-      <Drawer anchor="right" open={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
-        <Stack sx={{ width: 220, p: 2, gap: 1 }}>
+      <Drawer
+        anchor="right"
+        open={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        slotProps={{
+          paper: {
+            id: "app-mobile-nav",
+            component: "nav",
+            "aria-label": "Main navigation",
+          },
+        }}
+      >
+        <Stack sx={{ width: 260, maxWidth: "85vw", p: 2, gap: 0.5 }}>
           {navItems.map((item) => (
             <Button
               key={item.to}
@@ -108,6 +162,7 @@ export default function App() {
               sx={{
                 justifyContent: "flex-start",
                 color: "text.primary",
+                py: 1,
                 "&.active": { color: "primary.main", fontWeight: 700 },
               }}
             >
