@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -94,7 +95,18 @@ export default function DriverProfiles() {
                     />
                   }
                 >
-                  <Card variant="outlined" sx={{ cursor: "help", height: "100%" }}>
+                  <Card
+                    component={RouterLink}
+                    to={`/drivers/${driver.number}`}
+                    variant="outlined"
+                    sx={{
+                      cursor: "pointer",
+                      height: "100%",
+                      textDecoration: "none",
+                      color: "inherit",
+                      display: "block",
+                    }}
+                  >
                   <CardContent>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar

@@ -352,6 +352,32 @@ export function TeamLineupsSkeleton() {
   );
 }
 
+export function DriverDetailSkeleton() {
+  return (
+    <LoadingStateRegion label="Loading driver profile">
+      <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems={{ md: "flex-start" }}>
+        <Skeleton sx={wave()} variant="circular" width={120} height={120} />
+        <Box sx={{ flex: 1, width: "100%" }}>
+          <Skeleton sx={wave()} width="55%" height={40} />
+          <Skeleton sx={wave({ mt: 2 })} width="35%" height={24} />
+          <Skeleton sx={wave({ mt: 2 })} width="100%" height={72} />
+          <Skeleton sx={wave({ mt: 2 })} width="45%" height={32} />
+        </Box>
+      </Stack>
+    </LoadingStateRegion>
+  );
+}
+
+export function ConstructorDetailSkeleton() {
+  return (
+    <LoadingStateRegion label="Loading team details">
+      <Skeleton sx={wave()} width="50%" height={36} />
+      <Skeleton sx={wave({ mt: 2 })} width="28%" height={24} />
+      <Skeleton sx={wave({ mt: 3 })} width="100%" height={140} variant="rounded" />
+    </LoadingStateRegion>
+  );
+}
+
 export function CountdownSkeleton() {
   return (
     <LoadingStateRegion label="Loading countdown">

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import DriverProfiles from "./DriverProfiles";
 import {
   getDriversBySession,
@@ -28,7 +29,11 @@ describe("DriverProfiles page", () => {
       },
     ]);
 
-    render(<DriverProfiles />);
+    render(
+      <MemoryRouter>
+        <DriverProfiles />
+      </MemoryRouter>,
+    );
 
     await waitFor(() => expect(screen.getByText("Test Driver")).toBeInTheDocument());
     expect(screen.getByText("#1")).toBeInTheDocument();
@@ -39,7 +44,11 @@ describe("DriverProfiles page", () => {
   it("renders error when session key cannot be resolved", async () => {
     getLatestDriverChampionship.mockResolvedValue([]);
 
-    render(<DriverProfiles />);
+    render(
+      <MemoryRouter>
+        <DriverProfiles />
+      </MemoryRouter>,
+    );
 
     await waitFor(() =>
       expect(

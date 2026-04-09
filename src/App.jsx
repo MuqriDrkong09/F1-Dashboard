@@ -23,6 +23,7 @@ import Typography from "@mui/material/Typography";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import MenuIcon from "@mui/icons-material/Menu";
 import PageRouteFallback from "./components/PageRouteFallback";
+import SiteFooter from "./components/SiteFooter";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Drivers = lazy(() => import("./pages/Drivers"));
@@ -32,8 +33,11 @@ const RaceMeetingSessions = lazy(() => import("./pages/RaceMeetingSessions"));
 const TeamDriverMapping = lazy(() => import("./pages/TeamDriverMapping"));
 const CountdownTimer = lazy(() => import("./pages/CountdownTimer"));
 const DriverProfiles = lazy(() => import("./pages/DriverProfiles"));
+const DriverDetail = lazy(() => import("./pages/DriverDetail"));
+const ConstructorDetail = lazy(() => import("./pages/ConstructorDetail"));
 const RaceResults = lazy(() => import("./pages/RaceResults"));
 const HeadToHeadComparison = lazy(() => import("./pages/HeadToHeadComparison"));
+const Acknowledgements = lazy(() => import("./pages/Acknowledgements"));
 
 /** Grouped nav: ~4 top-level destinations (Dashboard + 3 menus) for easier scanning. */
 const navGroups = [
@@ -68,6 +72,12 @@ const navGroups = [
 function pathMatchesNavItem(pathname, to) {
   if (to === "/races") {
     return pathname === "/races" || pathname.startsWith("/races/");
+  }
+  if (to === "/drivers") {
+    return pathname === "/drivers" || pathname.startsWith("/drivers/");
+  }
+  if (to === "/constructors") {
+    return pathname === "/constructors" || pathname.startsWith("/constructors/");
   }
   return pathname === to;
 }
@@ -104,7 +114,15 @@ export default function App() {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", color: "text.primary" }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "background.default",
+        color: "text.primary",
+      }}
+    >
       <AppBar
         position="sticky"
         color="transparent"
@@ -304,35 +322,57 @@ export default function App() {
               </Stack>
             </Box>
           ))}
+          <Divider sx={{ my: 1 }} />
+          <Button
+            component={NavLink}
+            to="/acknowledgements"
+            onClick={() => setIsMenuOpen(false)}
+            sx={{
+              justifyContent: "flex-start",
+              color: "text.primary",
+              py: 1,
+              "&.active": { color: "primary.main", fontWeight: 700 },
+            }}
+          >
+            Acknowledgements
+          </Button>
         </Stack>
       </Drawer>
 
-      <Box
-        key={location.pathname}
-        sx={{
-          "@media (prefers-reduced-motion: reduce)": {
-            animation: "none",
-          },
-          animation: `${routeEnter} 340ms cubic-bezier(0.22, 1, 0.36, 1) both`,
-        }}
-      >
-        <Suspense fallback={<PageRouteFallback />}>
-          <Routes>
-            {/* App entry: send root URL straight to Dashboard */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/drivers" element={<Drivers />} />
-            <Route path="/constructors" element={<Constructors />} />
-            <Route path="/races/:meetingKey" element={<RaceMeetingSessions />} />
-            <Route path="/races" element={<Races />} />
-            <Route path="/team-drivers" element={<TeamDriverMapping />} />
-            <Route path="/countdown" element={<CountdownTimer />} />
-            <Route path="/profiles" element={<DriverProfiles />} />
-            <Route path="/results" element={<RaceResults />} />
-            <Route path="/head-to-head" element={<HeadToHeadComparison />} />
-          </Routes>
-        </Suspense>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <Box
+          key={location.pathname}
+          sx={{
+            flex: 1,
+            "@media (prefers-reduced-motion: reduce)": {
+              animation: "none",
+            },
+            animation: `${routeEnter} 340ms cubic-bezier(0.22, 1, 0.36, 1) both`,
+          }}
+        >
+          <Suspense fallback={<PageRouteFallback />}>
+            <Routes>
+              {/* App entry: send root URL straight to Dashboard */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/drivers/:driverNumber" element={<DriverDetail />} />
+              <Route path="/drivers" element={<Drivers />} />
+              <Route path="/constructors/team/:teamSlug" element={<ConstructorDetail />} />
+              <Route path="/constructors" element={<Constructors />} />
+              <Route path="/races/:meetingKey" element={<RaceMeetingSessions />} />
+              <Route path="/races" element={<Races />} />
+              <Route path="/team-drivers" element={<TeamDriverMapping />} />
+              <Route path="/countdown" element={<CountdownTimer />} />
+              <Route path="/profiles" element={<DriverProfiles />} />
+              <Route path="/results" element={<RaceResults />} />
+              <Route path="/head-to-head" element={<HeadToHeadComparison />} />
+              <Route path="/acknowledgements" element={<Acknowledgements />} />
+            </Routes>
+          </Suspense>
+        </Box>
       </Box>
+
+      <SiteFooter />
     </Box>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -142,11 +143,16 @@ export default function Constructors() {
                   }
                 >
                   <Card
+                    component={RouterLink}
+                    to={`/constructors/team/${encodeURIComponent(team.name)}`}
                     variant="outlined"
                     sx={{
                       bgcolor: "background.paper",
                       borderColor: "divider",
-                      cursor: "help",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      color: "inherit",
+                      display: "block",
                     }}
                   >
                   <CardContent>

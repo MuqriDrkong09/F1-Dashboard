@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -111,8 +112,16 @@ export default function DriverStandingsTable({ standings }) {
                   }
                 >
                   <Box
-                    component="span"
-                    sx={{ display: "inline-flex", maxWidth: "100%", cursor: "help" }}
+                    component={RouterLink}
+                    to={`/drivers/${driver.driverNumber}`}
+                    sx={{
+                      display: "inline-flex",
+                      maxWidth: "100%",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      color: "inherit",
+                      "&:hover": { opacity: 0.92 },
+                    }}
                   >
                     <Stack direction="row" spacing={1.25} alignItems="center">
                       <Avatar
@@ -144,8 +153,16 @@ export default function DriverStandingsTable({ standings }) {
                   }
                 >
                   <Box
-                    component="span"
-                    sx={{ display: "inline-flex", maxWidth: "100%", cursor: "help" }}
+                    component={RouterLink}
+                    to={`/constructors/team/${encodeURIComponent(driver.constructor)}`}
+                    sx={{
+                      display: "inline-flex",
+                      maxWidth: "100%",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      color: "inherit",
+                      "&:hover": { opacity: 0.92 },
+                    }}
                   >
                     <Stack direction="row" spacing={1} alignItems="center">
                       {driver.teamColor && (

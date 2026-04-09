@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Constructors from "./Constructors";
 import {
   getDriversBySession,
@@ -23,7 +24,11 @@ describe("Constructors page", () => {
       { team_name: "Team A", points_current: 120, position_current: 1 },
     ]);
 
-    render(<Constructors />);
+    render(
+      <MemoryRouter>
+        <Constructors />
+      </MemoryRouter>,
+    );
 
     await waitFor(() => expect(screen.getByText(/P1 - Team A/)).toBeInTheDocument());
     expect(screen.getByText("120 pts")).toBeInTheDocument();
@@ -34,7 +39,11 @@ describe("Constructors page", () => {
     getDriversBySession.mockResolvedValue([]);
     getTeamChampionshipBySession.mockResolvedValue([]);
 
-    render(<Constructors />);
+    render(
+      <MemoryRouter>
+        <Constructors />
+      </MemoryRouter>,
+    );
 
     await waitFor(() =>
       expect(

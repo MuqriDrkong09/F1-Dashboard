@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import DriverStandingsTable from "./DriverStandingsTable";
 
 const standings = [
@@ -26,9 +27,13 @@ const standings = [
   },
 ];
 
+function renderWithRouter(ui) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
+
 describe("DriverStandingsTable", () => {
   it("renders rows and fallback for wins", () => {
-    render(<DriverStandingsTable standings={standings} />);
+    renderWithRouter(<DriverStandingsTable standings={standings} />);
 
     expect(screen.getByText("Driver A")).toBeInTheDocument();
     expect(screen.getByText("Driver B")).toBeInTheDocument();
@@ -36,10 +41,23 @@ describe("DriverStandingsTable", () => {
   });
 
   it("sorts by points when clicking points header", () => {
-    render(<DriverStandingsTable standings={standings} />);
+    renderWithRouter(<DriverStandingsTable standings={standings} />);
     fireEvent.click(screen.getByText("Points"));
 
     const rows = screen.getAllByRole("row");
     expect(rows[1]).toHaveTextContent("Driver A");
+  });
+
+  it("links driver and team cells to detail routes", () => {
+    renderWithRouter(<DriverStandingsTable standings={standings} />);
+
+    expect(screen.getByRole("link", { name: /Driver A/i })).toHaveAttribute(
+      "href",
+      "/drivers/11",
+    );
+    expect(screen.getByRole("link", { name: /Team A/i })).toHaveAttribute(
+      "href",
+      "/constructors/team/Team%20A",
+    );
   });
 });

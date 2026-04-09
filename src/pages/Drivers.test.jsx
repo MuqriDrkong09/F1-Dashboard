@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Drivers from "./Drivers";
 import { useDriverStandings } from "../hooks/useDriverStandings";
 
@@ -16,6 +17,14 @@ jest.mock("recharts", () => ({
   Tooltip: () => <div>tooltip</div>,
 }));
 
+function renderPage() {
+  return render(
+    <MemoryRouter>
+      <Drivers />
+    </MemoryRouter>,
+  );
+}
+
 describe("Drivers page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,7 +39,7 @@ describe("Drivers page", () => {
       refetch: jest.fn(),
     });
 
-    render(<Drivers />);
+    renderPage();
     expect(
       screen.getByRole("status", { name: /loading standings/i }),
     ).toBeInTheDocument();
@@ -46,7 +55,7 @@ describe("Drivers page", () => {
       refetch,
     });
 
-    render(<Drivers />);
+    renderPage();
     expect(screen.getByText("Could not load standings: Boom")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(refetch).toHaveBeenCalledTimes(1);
@@ -72,7 +81,7 @@ describe("Drivers page", () => {
       refetch: jest.fn(),
     });
 
-    render(<Drivers />);
+    renderPage();
     expect(screen.getByText("Driver Points Progression")).toBeInTheDocument();
     expect(screen.getByText("Driver Standings Table")).toBeInTheDocument();
     expect(screen.getByText("Driver A")).toBeInTheDocument();

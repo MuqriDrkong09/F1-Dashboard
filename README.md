@@ -64,10 +64,11 @@ Current integration uses:
 ## Features Implemented
 
 - **Default route:** `/` → **`/dashboard`** (React Router `Navigate` in `App.jsx`)
+- **Site-wide footer** (`SiteFooter.jsx`) + **Acknowledgements** page at `/acknowledgements` (OpenF1 credit, F1® disclaimer, “built with”)
 - Multi-page React app with routing:
   - Dashboard (`/dashboard`)
-  - Drivers
-  - Constructors
+  - Drivers standings (`/drivers`) and **per-driver profile** (`/drivers/:driverNumber`, OpenF1 `driver` + championship row)
+  - Constructors (`/constructors`) and **per-team detail** (`/constructors/team/:teamSlug`, roster + points)
   - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`)
   - Line-ups (`/team-drivers`: teams + drivers for latest session)
 - MUI-based responsive UI and components
@@ -119,7 +120,7 @@ npm.cmd run test:coverage
 - [x] Vite + React project setup completed
 - [x] UI migrated to MUI
 - [x] Core pages implemented (`Dashboard`, `Drivers`, `Constructors`, `Races`)
-- [x] Extra pages implemented (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`)
+- [x] Extra pages implemented (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`, `Acknowledgements`)
 - [x] OpenF1 service layer added in `src/services/openf1.js`
 - [x] Endpoints integrated:
   - [x] `meetings?year=`
@@ -140,11 +141,7 @@ npm.cmd run test:coverage
 - [x] Team–driver line-ups: `TeamDriverMapping` at `/team-drivers` (`championship_teams` + `drivers?session_key=`)
 - [x] Tooltips/popups with richer driver/team details (`DriverRichSummary` / `TeamRichSummary` on standings, race results, constructors, line-ups, head-to-head, profiles)
 - [x] Bundle optimization via lazy loading/code splitting (`React.lazy` per route in `App.jsx`, `Suspense` + `PageRouteFallback`)
-
-### Layout & recognition (Later)
-
-- [ ] Site-wide **footer** (e.g. copyright year, nav links, link to acknowledgements)
-- [ ] **Acknowledgement / Recognition** page (credits: [OpenF1](https://openf1.org) API, data/third-party notices, F1® trademark disclaimer as appropriate) + route (e.g. `/acknowledgements`) and link from footer
+- [x] Site-wide **footer** + **Acknowledgements** at `/acknowledgements` (`SiteFooter.jsx`, `Acknowledgements.jsx`, link in mobile drawer)
 
 ### UI/Animation Enhancements (Later)
 

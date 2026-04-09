@@ -53,6 +53,28 @@ export async function getDriversBySession(sessionKey, signal) {
   return Array.isArray(data) ? data : [];
 }
 
+/**
+ * Single driver row from OpenF1 `/driver?driver_number=&session_key=`.
+ * Returns null if the endpoint 404s (falls back to `getDriversBySession` in callers if needed).
+ */
+export async function getDriverBySessionAndNumber(sessionKey, driverNumber, signal) {
+  const n = Number(driverNumber);
+  if (!Number.isFinite(n)) return null;
+
+  try {
+    const data = await fetchOpenF1(
+      `/driver?driver_number=${n}&session_key=${sessionKey}`,
+      signal,
+    );
+    if (Array.isArray(data)) return data[0] ?? null;
+    return data ?? null;
+  } catch (err) {
+    if (err.name === "AbortError") throw err;
+    if (String(err.message ?? "").includes("404")) return null;
+    throw err;
+  }
+}
+
 /** Pass `{ country_name: "Singapore" }` as the third argument to match OpenF1 `meetings` filters. */
 export async function getMeetingsByYear(year, signal, options = {}) {
   const params = new URLSearchParams({ year: String(year) });
