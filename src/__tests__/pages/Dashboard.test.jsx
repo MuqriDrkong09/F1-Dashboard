@@ -1,11 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import Dashboard from "./Dashboard";
+import { ThemeProvider } from "@mui/material/styles";
+import Dashboard from "../../pages/Dashboard";
+import { createAppTheme } from "../../theme";
 import {
   getLatestDriverChampionship,
   getMeetingsByYear,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getLatestDriverChampionship: jest.fn(),
   getMeetingsByYear: jest.fn(),
 }));
@@ -28,13 +30,20 @@ describe("Dashboard page", () => {
       { driver_number: 16, position_current: 1, points_current: 25 },
     ]);
 
-    render(<Dashboard />);
+    render(
+      <ThemeProvider theme={createAppTheme("dark")}>
+        <Dashboard />
+      </ThemeProvider>,
+    );
 
     await waitFor(() =>
       expect(screen.getByText("Australian Grand Prix")).toBeInTheDocument(),
     );
     expect(screen.getByText("Albert Park")).toBeInTheDocument();
-    expect(screen.getByText("#16")).toBeInTheDocument();
-    expect(screen.getByText("25 pts")).toBeInTheDocument();
+
+    const leaderCard = screen.getByText("Championship Leader").closest(".MuiCard-root");
+    const pointsCard = screen.getByText("Leader Points").closest(".MuiCard-root");
+    await waitFor(() => expect(leaderCard).toHaveTextContent("#16"), { timeout: 2500 });
+    await waitFor(() => expect(pointsCard).toHaveTextContent("25 pts"), { timeout: 2500 });
   });
 });

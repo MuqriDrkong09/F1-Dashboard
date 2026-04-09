@@ -10,6 +10,7 @@ module.exports = {
     "src/**/*.{js,jsx}",
     "!src/main.jsx",
     "!src/test/**",
+    "!src/__tests__/**",
     "!**/*.test.{js,jsx}",
   ],
   coverageThreshold: {

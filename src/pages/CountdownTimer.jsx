@@ -6,10 +6,26 @@ import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
 import { CountdownSkeleton } from "../components/ApiLoadingSkeletons";
 import Typography from "@mui/material/Typography";
+import { keyframes } from "@mui/material/styles";
 import {
   getMeetingsByYear,
   getSessionsByMeeting,
 } from "../services/openf1";
+
+const MS_HOUR = 60 * 60 * 1000;
+const MS_DAY = 24 * MS_HOUR;
+const MS_FIVE_MIN = 5 * 60 * 1000;
+
+const countdownPulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.03);
+  }
+`;
 
 function formatDuration(ms) {
   if (ms <= 0) return "Starting now";
@@ -21,6 +37,15 @@ function formatDuration(ms) {
   const seconds = totalSeconds % 60;
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
+/** calm = green (>24h), soon = amber (1h–24h), urgent = red (<1h), live = session imminently started */
+function getCountdownUrgency(remainingMs) {
+  if (remainingMs == null) return "calm";
+  if (remainingMs <= 0) return "live";
+  if (remainingMs > MS_DAY) return "calm";
+  if (remainingMs > MS_HOUR) return "soon";
+  return "urgent";
 }
 
 export default function CountdownTimer() {
@@ -100,6 +125,39 @@ export default function CountdownTimer() {
     return Date.parse(target.startTime) - now;
   }, [target, now]);
 
+  const urgency = getCountdownUrgency(remaining);
+  const shouldPulse =
+    remaining != null && remaining > 0 && remaining <= MS_FIVE_MIN;
+
+  const urgencyStyles = useMemo(() => {
+    switch (urgency) {
+      case "live":
+        return {
+          borderColor: "success.main",
+          countdownColor: "success.main",
+          hint: "Session start time reached — lights out soon.",
+        };
+      case "soon":
+        return {
+          borderColor: "warning.main",
+          countdownColor: "warning.light",
+          hint: "Less than 24 hours — tune in soon.",
+        };
+      case "urgent":
+        return {
+          borderColor: "error.main",
+          countdownColor: "error.light",
+          hint: "Less than one hour to session start.",
+        };
+      default:
+        return {
+          borderColor: "success.dark",
+          countdownColor: "success.light",
+          hint: "Plenty of time until the next session.",
+        };
+    }
+  }, [urgency]);
+
   return (
     <Box component="main" sx={{ py: { xs: 3, sm: 4, md: 6 } }}>
       <Container maxWidth="md">
@@ -115,7 +173,18 @@ export default function CountdownTimer() {
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (
-          <Card variant="outlined">
+          <Card
+            component="section"
+            aria-label="Session countdown"
+            variant="outlined"
+            data-urgency={urgency}
+            sx={{
+              borderWidth: 2,
+              borderColor: urgencyStyles.borderColor,
+              transition: (theme) =>
+                theme.transitions.create(["border-color"], { duration: 400 }),
+            }}
+          >
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {target?.meetingName}
@@ -123,8 +192,24 @@ export default function CountdownTimer() {
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 {target?.sessionName} • {target?.circuit}, {target?.country}
               </Typography>
-              <Typography variant="h3" sx={{ mt: 3, fontWeight: 800 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  mt: 3,
+                  fontWeight: 800,
+                  color: urgencyStyles.countdownColor,
+                  ...(shouldPulse && {
+                    animation: `${countdownPulse} 1.25s ease-in-out infinite`,
+                  }),
+                  "@media (prefers-reduced-motion: reduce)": {
+                    animation: "none",
+                  },
+                }}
+              >
                 {formatDuration(remaining ?? 0)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                {urgencyStyles.hint}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                 Starts at: {new Date(target?.startTime ?? "").toLocaleString()}

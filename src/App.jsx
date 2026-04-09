@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { keyframes } from "@mui/material/styles";
+import { alpha, keyframes } from "@mui/material/styles";
 import {
   Link as RouterLink,
   NavLink,
@@ -20,10 +20,13 @@ import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import PageRouteFallback from "./components/PageRouteFallback";
 import SiteFooter from "./components/SiteFooter";
+import { useThemeMode } from "./context/AppThemeProvider";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Drivers = lazy(() => import("./pages/Drivers"));
@@ -97,7 +100,32 @@ const routeEnter = keyframes`
   }
 `;
 
+const navBarUnderline = {
+  position: "relative",
+  overflow: "visible",
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    left: "50%",
+    bottom: -8,
+    width: "68%",
+    height: 3,
+    borderRadius: 10,
+    transform: "translateX(-50%) scaleX(0)",
+    transformOrigin: "center",
+    transition: "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
+    pointerEvents: "none",
+  },
+  "&.active::after": {
+    transform: "translateX(-50%) scaleX(1)",
+  },
+  "@media (prefers-reduced-motion: reduce)": {
+    "&::after": { transition: "none" },
+  },
+};
+
 export default function App() {
+  const { mode, toggleMode } = useThemeMode();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [navMenuGroupId, setNavMenuGroupId] = useState(null);
   const [navMenuAnchor, setNavMenuAnchor] = useState(null);
@@ -172,13 +200,22 @@ export default function App() {
                 end={true}
                 size="small"
                 sx={{
+                  ...navBarUnderline,
                   color: "text.secondary",
                   whiteSpace: "nowrap",
                   px: 1.25,
                   py: 0.5,
+                  "&::after": {
+                    ...navBarUnderline["&::after"],
+                    bgcolor: "primary.light",
+                  },
                   "&.active": {
                     color: "common.white",
                     bgcolor: "primary.main",
+                  },
+                  "&.active::after": {
+                    ...navBarUnderline["&.active::after"],
+                    bgcolor: alpha("#ffffff", 0.9),
                   },
                 }}
               >
@@ -205,13 +242,24 @@ export default function App() {
                       }
                     }}
                     sx={{
+                      ...navBarUnderline,
                       color: active ? "common.white" : "text.secondary",
                       bgcolor: active ? "primary.main" : "transparent",
                       whiteSpace: "nowrap",
                       px: 1.25,
                       py: 0.5,
+                      "&::after": {
+                        ...navBarUnderline["&::after"],
+                        bgcolor: alpha("#ffffff", 0.92),
+                        transform: active
+                          ? "translateX(-50%) scaleX(1)"
+                          : "translateX(-50%) scaleX(0)",
+                      },
                       "&:hover": {
                         bgcolor: active ? "primary.dark" : "action.hover",
+                      },
+                      "@media (prefers-reduced-motion: reduce)": {
+                        "&::after": { transition: "none" },
                       },
                     }}
                   >
@@ -252,11 +300,24 @@ export default function App() {
 
             <IconButton
               type="button"
+              onClick={toggleMode}
+              aria-label={mode === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              sx={{
+                color: "text.secondary",
+                flexShrink: 0,
+                ml: { xs: "auto", md: 0.5 },
+              }}
+            >
+              {mode === "dark" ? <LightModeOutlined /> : <DarkModeOutlined />}
+            </IconButton>
+
+            <IconButton
+              type="button"
               aria-label="Open navigation menu"
               aria-expanded={isMenuOpen}
               aria-controls="app-mobile-nav"
               onClick={() => setIsMenuOpen(true)}
-              sx={{ ml: "auto", display: { xs: "inline-flex", md: "none" }, color: "text.secondary" }}
+              sx={{ ml: { xs: 0.25, md: "auto" }, display: { xs: "inline-flex", md: "none" }, color: "text.secondary" }}
             >
               <MenuIcon />
             </IconButton>
@@ -286,7 +347,21 @@ export default function App() {
               justifyContent: "flex-start",
               color: "text.primary",
               py: 1,
-              "&.active": { color: "primary.main", fontWeight: 700 },
+              borderLeft: 3,
+              borderLeftStyle: "solid",
+              borderLeftColor: "transparent",
+              borderRadius: 0,
+              pl: 2,
+              transition: "border-color 0.28s ease, padding-left 0.28s ease",
+              "&.active": {
+                color: "primary.main",
+                fontWeight: 700,
+                borderLeftColor: "primary.main",
+                pl: 1.75,
+              },
+              "@media (prefers-reduced-motion: reduce)": {
+                transition: "none",
+              },
             }}
           >
             Dashboard
@@ -313,7 +388,20 @@ export default function App() {
                       color: "text.primary",
                       py: 1,
                       pl: 2,
-                      "&.active": { color: "primary.main", fontWeight: 700 },
+                      borderLeft: 3,
+                      borderLeftStyle: "solid",
+                      borderLeftColor: "transparent",
+                      borderRadius: 0,
+                      transition: "border-color 0.28s ease, padding-left 0.28s ease",
+                      "&.active": {
+                        color: "primary.main",
+                        fontWeight: 700,
+                        borderLeftColor: "primary.main",
+                        pl: 1.75,
+                      },
+                      "@media (prefers-reduced-motion: reduce)": {
+                        transition: "none",
+                      },
                     }}
                   >
                     {item.label}
@@ -331,11 +419,41 @@ export default function App() {
               justifyContent: "flex-start",
               color: "text.primary",
               py: 1,
-              "&.active": { color: "primary.main", fontWeight: 700 },
+              borderLeft: 3,
+              borderLeftStyle: "solid",
+              borderLeftColor: "transparent",
+              borderRadius: 0,
+              pl: 2,
+              transition: "border-color 0.28s ease, padding-left 0.28s ease",
+              "&.active": {
+                color: "primary.main",
+                fontWeight: 700,
+                borderLeftColor: "primary.main",
+                pl: 1.75,
+              },
+              "@media (prefers-reduced-motion: reduce)": {
+                transition: "none",
+              },
             }}
           >
             Acknowledgements
           </Button>
+          <Divider sx={{ my: 1 }} />
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+              Theme
+            </Typography>
+            <IconButton
+              type="button"
+              size="small"
+              onClick={() => {
+                toggleMode();
+              }}
+              aria-label={mode === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            >
+              {mode === "dark" ? <LightModeOutlined fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
+            </IconButton>
+          </Stack>
         </Stack>
       </Drawer>
 

@@ -13,6 +13,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
+import { alpha } from "@mui/material/styles";
 import DriverRichSummary, { richTooltipSlotProps } from "../components/DriverRichSummary";
 import TeamRichSummary from "../components/TeamRichSummary";
 import {
@@ -20,6 +21,112 @@ import {
   getLatestDriverChampionship,
   getSessionResults,
 } from "../services/openf1";
+
+const PODIUM_TIERS = {
+  1: {
+    label: "1st",
+    gradient:
+      "linear-gradient(160deg, #fde68a 0%, #f59e0b 38%, #b45309 72%, #78350f 100%)",
+    accent: "#fbbf24",
+    textColor: "#1c1917",
+  },
+  2: {
+    label: "2nd",
+    gradient:
+      "linear-gradient(160deg, #f1f5f9 0%, #94a3b8 45%, #64748b 78%, #334155 100%)",
+    accent: "#cbd5e1",
+    textColor: "#0f172a",
+  },
+  3: {
+    label: "3rd",
+    gradient:
+      "linear-gradient(160deg, #fed7aa 0%, #ea580c 42%, #c2410c 75%, #7c2d12 100%)",
+    accent: "#fb923c",
+    textColor: "#1c1917",
+  },
+};
+
+function podiumRowSx(position) {
+  if (position === 1) {
+    return {
+      bgcolor: (theme) => alpha("#fbbf24", theme.palette.mode === "dark" ? 0.14 : 0.18),
+      boxShadow: (theme) => `inset 3px 0 0 ${theme.palette.warning.light}`,
+    };
+  }
+  if (position === 2) {
+    return {
+      bgcolor: (theme) => alpha("#94a3b8", theme.palette.mode === "dark" ? 0.12 : 0.14),
+      boxShadow: (theme) => `inset 3px 0 0 ${theme.palette.grey[400]}`,
+    };
+  }
+  if (position === 3) {
+    return {
+      bgcolor: (theme) => alpha("#fb923c", theme.palette.mode === "dark" ? 0.12 : 0.16),
+      boxShadow: (theme) => `inset 3px 0 0 ${theme.palette.warning.dark}`,
+    };
+  }
+  return {};
+}
+
+function PodiumSlot({ position, entry }) {
+  const tier = PODIUM_TIERS[position];
+  if (!tier) return null;
+
+  const heightEmphasis =
+    position === 1 ? { minHeight: { xs: 132, sm: 148 } } : { minHeight: { xs: 100, sm: 112 } };
+
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        maxWidth: { xs: "none", sm: 220 },
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        ...heightEmphasis,
+      }}
+    >
+      <Box
+        component="article"
+        aria-label={
+          entry
+            ? `P${position}, ${entry.driver}`
+            : `P${position}, no driver data`
+        }
+        sx={{
+          p: 2,
+          textAlign: "center",
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: alpha(tier.accent, 0.55),
+          background: tier.gradient,
+          color: tier.textColor,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          flex: 1,
+          boxShadow: (theme) =>
+            `0 8px 24px ${alpha(theme.palette.common.black, 0.35)}, inset 0 1px 0 ${alpha("#fff", 0.2)}`,
+        }}
+      >
+        <Typography
+          variant="overline"
+          sx={{ fontWeight: 800, letterSpacing: 2, opacity: 0.92 }}
+        >
+          {tier.label}
+        </Typography>
+        <Typography variant="h6" sx={{ fontWeight: 800, mt: 0.5, lineHeight: 1.25 }}>
+          {entry?.driver ?? "—"}
+        </Typography>
+        {entry?.team && (
+          <Typography variant="caption" sx={{ mt: 0.75, opacity: 0.88, display: "block" }}>
+            {entry.team}
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+}
 
 export default function RaceResults() {
   const [results, setResults] = useState([]);
@@ -100,7 +207,14 @@ export default function RaceResults() {
     return () => controller.abort();
   }, []);
 
-  const topThree = useMemo(() => results.slice(0, 3), [results]);
+  const podiumByPosition = useMemo(() => {
+    const map = new Map(results.map((r) => [r.position, r]));
+    return {
+      p1: map.get(1) ?? null,
+      p2: map.get(2) ?? null,
+      p3: map.get(3) ?? null,
+    };
+  }, [results]);
 
   return (
     <Box component="main" sx={{ py: { xs: 3, sm: 4, md: 6 } }}>
@@ -118,18 +232,24 @@ export default function RaceResults() {
           <Alert severity="error">{error}</Alert>
         ) : (
           <Stack spacing={2}>
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+            <Box component="section" aria-label="Podium">
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
                 Podium
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {topThree.length > 0
-                  ? topThree
-                      .map((entry) => `P${entry.position}: ${entry.driver}`)
-                      .join(" • ")
-                  : "No data"}
-              </Typography>
-            </Paper>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{
+                  width: "100%",
+                  alignItems: { xs: "stretch", sm: "flex-end" },
+                  justifyContent: "center",
+                }}
+              >
+                <PodiumSlot position={2} entry={podiumByPosition.p2} />
+                <PodiumSlot position={1} entry={podiumByPosition.p1} />
+                <PodiumSlot position={3} entry={podiumByPosition.p3} />
+              </Stack>
+            </Box>
 
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">
@@ -145,7 +265,11 @@ export default function RaceResults() {
                 </TableHead>
                 <TableBody>
                   {results.map((row) => (
-                    <TableRow key={`${row.position}-${row.driver}`} hover>
+                    <TableRow
+                      key={`${row.position}-${row.driver}`}
+                      hover
+                      sx={podiumRowSx(row.position)}
+                    >
                       <TableCell sx={{ fontWeight: 700, color: "primary.main" }}>
                         {row.position}
                       </TableCell>

@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import HeadToHeadComparison from "./HeadToHeadComparison";
+import HeadToHeadComparison from "../../pages/HeadToHeadComparison";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
   getSessionResults,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
   getSessionResults: jest.fn(),

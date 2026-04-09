@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import DriverStandingsTable from "./DriverStandingsTable";
+import DriverStandingsTable from "../../components/DriverStandingsTable";
 
 const standings = [
   {

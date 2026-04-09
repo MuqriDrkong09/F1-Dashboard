@@ -82,6 +82,9 @@ Current integration uses:
   - Hover animations
   - Sticky navigation
   - Improved spacing and visual hierarchy
+- **Theme:** light/dark toggle (toolbar + drawer) with **`localStorage`** persistence (`f1-dashboard-color-mode`)
+- **Navigation:** animated underline on active desktop items; mobile drawer uses an animated **left border** on the active route
+- **Dashboard:** numeric metrics (**points**, **driver #**, **countdown days**, **current round**) **count up** on load (easing); respects **`prefers-reduced-motion`**
 
 ## Challenges Solved
 
@@ -111,6 +114,8 @@ Run tests with coverage (enforces thresholds from `jest.config.cjs`):
 ```bash
 npm.cmd run test:coverage
 ```
+
+**Test layout:** specs live under `src/__tests__/`, mirroring `src/` — e.g. `src/pages/Dashboard.jsx` → `src/__tests__/pages/Dashboard.test.jsx`, `src/App.jsx` → `src/__tests__/App.test.jsx`. Shared Jest setup remains in `src/test/setupTests.js`.
 
 ## Progress Checklist
 
@@ -146,9 +151,8 @@ npm.cmd run test:coverage
 ### UI/Animation Enhancements (Later)
 
 - [x] Add skeleton loaders to all API-backed pages (`src/components/ApiLoadingSkeletons.jsx` + per-page usage)
-- [ ] Add sticky table headers for standings/results tables
-- [ ] Add podium styling (gold/silver/bronze) in `RaceResults`
-- [ ] Add countdown urgency states (green/amber/red + pulse near start)
-- [ ] Add animated active nav indicator
-- [ ] Add animated number count-up for dashboard metrics
-- [ ] Add dark/light theme toggle with persistence
+- [x] Add podium styling (gold/silver/bronze) in `RaceResults`
+- [x] Add countdown urgency states (green/amber/red + pulse near start)
+- [x] Add animated active nav indicator
+- [x] Add animated number count-up for dashboard metrics
+- [x] Add dark/light theme toggle with persistence

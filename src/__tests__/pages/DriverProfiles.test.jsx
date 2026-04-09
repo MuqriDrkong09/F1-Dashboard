@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import DriverProfiles from "./DriverProfiles";
+import DriverProfiles from "../../pages/DriverProfiles";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
 }));

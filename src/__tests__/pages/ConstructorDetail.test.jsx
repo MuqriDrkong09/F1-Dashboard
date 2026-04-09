@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import ConstructorDetail from "./ConstructorDetail";
+import ConstructorDetail from "../../pages/ConstructorDetail";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getLatestDriverChampionship: jest.fn(),
   getTeamChampionshipBySession: jest.fn(),
   getDriversBySession: jest.fn(),

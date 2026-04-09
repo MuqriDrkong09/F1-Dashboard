@@ -1,11 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { useDriverStandings } from "./useDriverStandings";
+import { useDriverStandings } from "../../hooks/useDriverStandings";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getLatestDriverChampionship: jest.fn(),
   getDriversBySession: jest.fn(),
 }));

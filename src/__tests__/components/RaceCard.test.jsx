@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import RaceCard from "./RaceCard";
+import RaceCard from "../../components/RaceCard";
 
 describe("RaceCard", () => {
   it("renders race details", () => {

@@ -6,7 +6,7 @@ import {
   getSessionResults,
   getTeamChampionshipBySession,
   resolveMeetingForDetail,
-} from "./openf1";
+} from "../../services/openf1";
 
 describe("openf1 service", () => {
   beforeEach(() => {

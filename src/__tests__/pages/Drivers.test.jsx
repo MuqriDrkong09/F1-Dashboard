@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Drivers from "./Drivers";
-import { useDriverStandings } from "../hooks/useDriverStandings";
+import Drivers from "../../pages/Drivers";
+import { useDriverStandings } from "../../hooks/useDriverStandings";
 
-jest.mock("../hooks/useDriverStandings", () => ({
+jest.mock("../../hooks/useDriverStandings", () => ({
   useDriverStandings: jest.fn(),
 }));
 

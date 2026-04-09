@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Acknowledgements from "./Acknowledgements";
+import Acknowledgements from "../../pages/Acknowledgements";
 
 describe("Acknowledgements page", () => {
   it("renders credits and trademark section", () => {

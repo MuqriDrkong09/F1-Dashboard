@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import RaceMeetingSessions from "./RaceMeetingSessions";
-import { getSessionsByMeeting, resolveMeetingForDetail } from "../services/openf1";
+import RaceMeetingSessions from "../../pages/RaceMeetingSessions";
+import { getSessionsByMeeting, resolveMeetingForDetail } from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   resolveMeetingForDetail: jest.fn(),
   getSessionsByMeeting: jest.fn(),
 }));

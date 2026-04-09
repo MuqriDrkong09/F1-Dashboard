@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
+import CountUpNumber from "../components/CountUpNumber";
 import { DashboardSkeleton } from "../components/ApiLoadingSkeletons";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -12,7 +13,74 @@ import {
   getMeetingsByYear,
 } from "../services/openf1";
 
+/** @typedef {{ label: string } & (
+ *   | { kind: "text"; text: string }
+ *   | { kind: "points"; points: number }
+ *   | { kind: "driverNumber"; number: number }
+ *   | { kind: "round"; round: number; total: number }
+ *   | { kind: "days"; days: number }
+ * )} StatCardModel */
+
+function getCountdownParts(targetDate) {
+  if (!targetDate) return { kind: "text", text: "TBD" };
+  const diff = Date.parse(targetDate) - Date.now();
+  if (!Number.isFinite(diff)) return { kind: "text", text: "TBD" };
+  if (diff <= 0) return { kind: "text", text: "In progress" };
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  return { kind: "days", days };
+}
+
+function StatValue({ card }) {
+  const titleSx = { mt: 1, fontWeight: 700 };
+
+  if (card.kind === "text") {
+    return (
+      <Typography variant="h6" sx={titleSx}>
+        {card.text}
+      </Typography>
+    );
+  }
+
+  if (card.kind === "points") {
+    return (
+      <Typography variant="h6" component="div" sx={titleSx}>
+        <CountUpNumber component="span" end={card.points} duration={1000} /> pts
+      </Typography>
+    );
+  }
+
+  if (card.kind === "driverNumber") {
+    return (
+      <Typography variant="h6" component="div" sx={titleSx}>
+        #
+        <CountUpNumber component="span" end={card.number} duration={1000} />
+      </Typography>
+    );
+  }
+
+  if (card.kind === "round") {
+    return (
+      <Typography variant="h6" component="div" sx={titleSx}>
+        Round <CountUpNumber component="span" end={card.round} duration={1000} /> /{" "}
+        {card.total}
+      </Typography>
+    );
+  }
+
+  if (card.kind === "days") {
+    return (
+      <Typography variant="h6" component="div" sx={titleSx}>
+        <CountUpNumber component="span" end={card.days} duration={1000} />{" "}
+        {card.days === 1 ? "day" : "days"}
+      </Typography>
+    );
+  }
+
+  return null;
+}
+
 export default function Dashboard() {
+  /** @type {[StatCardModel[], function]} */
   const [statCards, setStatCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,15 +89,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     const controller = new AbortController();
-
-    function getCountdown(targetDate) {
-      if (!targetDate) return "TBD";
-      const diff = Date.parse(targetDate) - Date.now();
-      if (!Number.isFinite(diff)) return "TBD";
-      if (diff <= 0) return "In progress";
-      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-      return `${days} day${days === 1 ? "" : "s"}`;
-    }
 
     async function fetchDashboardData() {
       try {
@@ -61,41 +120,51 @@ export default function Dashboard() {
             Number(a.position_current ?? 999) - Number(b.position_current ?? 999),
         )[0];
 
-        setStatCards([
+        const countdown = getCountdownParts(nextMeeting?.date_start);
+
+        /** @type {StatCardModel[]} */
+        const cards = [
           {
             label: "Next Grand Prix",
-            value: nextMeeting?.meeting_name ?? "TBD",
+            kind: "text",
+            text: nextMeeting?.meeting_name ?? "TBD",
           },
           {
             label: "Circuit",
-            value: nextMeeting?.circuit_short_name ?? "TBD",
+            kind: "text",
+            text: nextMeeting?.circuit_short_name ?? "TBD",
           },
           {
             label: "Countdown",
-            value: getCountdown(nextMeeting?.date_start),
+            ...(countdown.kind === "days"
+              ? { kind: "days", days: countdown.days }
+              : { kind: "text", text: countdown.text }),
           },
-          {
-            label: "Season Progress",
-            value:
-              totalRounds > 0
-                ? `Round ${Math.min(completedRounds + 1, totalRounds)} / ${totalRounds}`
-                : "TBD",
-          },
-          {
-            label: "Championship Leader",
-            value:
-              championshipLeader?.driver_number !== undefined
-                ? `#${championshipLeader.driver_number}`
-                : "TBD",
-          },
-          {
-            label: "Leader Points",
-            value:
-              championshipLeader?.points_current !== undefined
-                ? `${championshipLeader.points_current} pts`
-                : "TBD",
-          },
-        ]);
+          totalRounds > 0
+            ? {
+                label: "Season Progress",
+                kind: "round",
+                round: Math.min(completedRounds + 1, totalRounds),
+                total: totalRounds,
+              }
+            : { label: "Season Progress", kind: "text", text: "TBD" },
+          championshipLeader?.driver_number !== undefined
+            ? {
+                label: "Championship Leader",
+                kind: "driverNumber",
+                number: Number(championshipLeader.driver_number),
+              }
+            : { label: "Championship Leader", kind: "text", text: "TBD" },
+          championshipLeader?.points_current !== undefined
+            ? {
+                label: "Leader Points",
+                kind: "points",
+                points: Number(championshipLeader.points_current),
+              }
+            : { label: "Leader Points", kind: "text", text: "TBD" },
+        ];
+
+        setStatCards(cards);
       } catch (err) {
         if (err.name === "AbortError") return;
         setError(err.message ?? "Failed to load dashboard metrics");
@@ -153,9 +222,7 @@ export default function Dashboard() {
                     >
                       {card.label}
                     </Typography>
-                    <Typography variant="h6" sx={{ mt: 1, fontWeight: 700 }}>
-                      {card.value}
-                    </Typography>
+                    <StatValue card={card} />
                   </CardContent>
                 </Card>
               </Grid>

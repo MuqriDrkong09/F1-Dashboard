@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Races from "./Races";
-import { getMeetingsByYear } from "../services/openf1";
+import Races from "../../pages/Races";
+import { getMeetingsByYear } from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getMeetingsByYear: jest.fn(),
 }));
 

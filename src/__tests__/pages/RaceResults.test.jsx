@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import RaceResults from "./RaceResults";
+import RaceResults from "../../pages/RaceResults";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
   getSessionResults,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
   getSessionResults: jest.fn(),
@@ -43,10 +43,13 @@ describe("RaceResults page", () => {
     render(<RaceResults />);
 
     await waitFor(() => expect(screen.getByText("Podium")).toBeInTheDocument());
-    expect(
-      screen.getByText(/P1: Driver One.*P2: Driver Two/),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Driver One")).toBeInTheDocument();
+    expect(screen.getByLabelText("P1, Driver One")).toBeInTheDocument();
+    expect(screen.getByLabelText("P2, Driver Two")).toBeInTheDocument();
+    expect(screen.getByLabelText("P3, no driver data")).toBeInTheDocument();
+    expect(screen.getByText("1st")).toBeInTheDocument();
+    expect(screen.getByText("2nd")).toBeInTheDocument();
+    expect(screen.getByText("3rd")).toBeInTheDocument();
+    expect(screen.getAllByText("Driver One").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Leader")).toBeInTheDocument();
   });
 

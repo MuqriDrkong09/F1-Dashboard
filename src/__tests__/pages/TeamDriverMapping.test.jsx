@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import TeamDriverMapping from "./TeamDriverMapping";
+import TeamDriverMapping from "../../pages/TeamDriverMapping";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
-} from "../services/openf1";
+} from "../../services/openf1";
 
-jest.mock("../services/openf1", () => ({
+jest.mock("../../services/openf1", () => ({
   getDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
   getTeamChampionshipBySession: jest.fn(),
