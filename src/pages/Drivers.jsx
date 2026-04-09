@@ -3,8 +3,8 @@ import DriverStandingsTable from "../components/DriverStandingsTable";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { DriversStandingsSkeleton } from "../components/ApiLoadingSkeletons";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -46,12 +46,7 @@ export default function Drivers() {
         </Box>
 
         <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, bgcolor: "background.paper" }}>
-          {isLoading && (
-            <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-              <CircularProgress />
-              <Typography color="text.secondary">Loading standings...</Typography>
-            </Stack>
-          )}
+          {isLoading && <DriversStandingsSkeleton />}
 
           {error && (
             <Stack spacing={2}>

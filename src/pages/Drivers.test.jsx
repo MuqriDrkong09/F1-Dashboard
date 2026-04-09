@@ -31,7 +31,9 @@ describe("Drivers page", () => {
     });
 
     render(<Drivers />);
-    expect(screen.getByText("Loading standings...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: /loading standings/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows error and retries", () => {

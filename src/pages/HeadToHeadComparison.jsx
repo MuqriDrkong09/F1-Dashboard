@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Divider from "@mui/material/Divider";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { HeadToHeadSkeleton } from "../components/ApiLoadingSkeletons";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import InputLabel from "@mui/material/InputLabel";
@@ -211,10 +211,7 @@ export default function HeadToHeadComparison() {
         </Typography>
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">Loading comparison data...</Typography>
-          </Stack>
+          <HeadToHeadSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (

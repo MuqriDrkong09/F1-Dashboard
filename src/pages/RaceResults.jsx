@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { RaceResultsSkeleton } from "../components/ApiLoadingSkeletons";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
@@ -113,10 +113,7 @@ export default function RaceResults() {
         </Typography>
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">Loading race results...</Typography>
-          </Stack>
+          <RaceResultsSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (

@@ -4,10 +4,9 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { ConstructorsSkeleton } from "../components/ApiLoadingSkeletons";
 import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import { richTooltipSlotProps } from "../components/DriverRichSummary";
@@ -122,12 +121,7 @@ export default function Constructors() {
         </Box>
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">
-              Loading constructors standings...
-            </Typography>
-          </Stack>
+          <ConstructorsSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (

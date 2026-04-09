@@ -71,9 +71,9 @@ Current integration uses:
 - Driver standings fetched from live API data
 - Recharts line chart for driver points progression
 - Enhanced UX states:
-  - Skeleton loading placeholders
-  - Error state with retry button
-  - Last-updated timestamp
+  - **Skeleton loaders** on every API-backed page (layout-aware placeholders via `ApiLoadingSkeletons.jsx`)
+  - Error state with retry button (Drivers page)
+  - Last-updated timestamp (Drivers)
 - Polished interactions:
   - Hover animations
   - Sticky navigation
@@ -139,7 +139,7 @@ npm.cmd run test:coverage
 
 ### UI/Animation Enhancements (Later)
 
-- [ ] Add skeleton loaders to all API-backed pages
+- [x] Add skeleton loaders to all API-backed pages (`src/components/ApiLoadingSkeletons.jsx` + per-page usage)
 - [ ] Add sticky table headers for standings/results tables
 - [ ] Add podium styling (gold/silver/bronze) in `RaceResults`
 - [ ] Add countdown urgency states (green/amber/red + pulse near start)

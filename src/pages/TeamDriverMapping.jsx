@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { TeamLineupsSkeleton } from "../components/ApiLoadingSkeletons";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
@@ -135,10 +135,7 @@ export default function TeamDriverMapping() {
         </Typography>
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">Loading line-ups...</Typography>
-          </Stack>
+          <TeamLineupsSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : !hasRows ? (

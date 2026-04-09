@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import RaceCard from "../components/RaceCard";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
-import Stack from "@mui/material/Stack";
+import { RaceCalendarSkeleton } from "../components/ApiLoadingSkeletons";
 import Typography from "@mui/material/Typography";
 import { getMeetingsByYear } from "../services/openf1";
 
@@ -73,10 +72,7 @@ export default function Races() {
         </Box>
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">Loading race calendar...</Typography>
-          </Stack>
+          <RaceCalendarSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (

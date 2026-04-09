@@ -19,7 +19,9 @@ describe("Races page", () => {
         <Races />
       </MemoryRouter>,
     );
-    expect(screen.getByText("Loading race calendar...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: /loading race calendar/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders meetings from API", async () => {

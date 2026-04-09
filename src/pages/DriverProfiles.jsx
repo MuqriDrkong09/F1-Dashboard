@@ -5,8 +5,8 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { DriverProfilesSkeleton } from "../components/ApiLoadingSkeletons";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -72,10 +72,7 @@ export default function DriverProfiles() {
         </Typography>
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">Loading driver profiles...</Typography>
-          </Stack>
+          <DriverProfilesSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (

@@ -3,11 +3,10 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
+import { MeetingSessionsTableSkeleton } from "../components/ApiLoadingSkeletons";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -96,10 +95,7 @@ export default function RaceMeetingSessions() {
         )}
 
         {isLoading ? (
-          <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
-            <CircularProgress />
-            <Typography color="text.secondary">Loading sessions...</Typography>
-          </Stack>
+          <MeetingSessionsTableSkeleton />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : sessions.length === 0 ? (
