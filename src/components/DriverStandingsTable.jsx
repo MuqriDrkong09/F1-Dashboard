@@ -11,6 +11,9 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
+import DriverRichSummary, { richTooltipSlotProps } from "./DriverRichSummary";
+import TeamRichSummary from "./TeamRichSummary";
 
 export default function DriverStandingsTable({ standings }) {
   const [sortBy, setSortBy] = useState("position");
@@ -89,38 +92,78 @@ export default function DriverStandingsTable({ standings }) {
                 {driver.position}
               </TableCell>
               <TableCell>
-                <Stack direction="row" spacing={1.25} alignItems="center">
-                  <Avatar
-                    src={driver.headshotUrl}
-                    alt={driver.fullName}
-                    sx={{ width: 30, height: 30, bgcolor: "primary.main", fontSize: 12 }}
+                <Tooltip
+                  enterTouchDelay={0}
+                  slotProps={richTooltipSlotProps}
+                  title={
+                    <DriverRichSummary
+                      fullName={driver.fullName}
+                      driverNumber={driver.driverNumber}
+                      code={driver.code}
+                      headshotUrl={driver.headshotUrl}
+                      teamName={driver.constructor}
+                      teamColor={driver.teamColor}
+                      broadcastName={driver.broadcastName}
+                      championshipPosition={driver.position}
+                      championshipPoints={driver.points}
+                      wins={driver.wins}
+                    />
+                  }
+                >
+                  <Box
+                    component="span"
+                    sx={{ display: "inline-flex", maxWidth: "100%", cursor: "help" }}
                   >
-                    {driver.code || driver.fullName.slice(0, 1)}
-                  </Avatar>
-                  <Box>
-                    <Typography sx={{ fontWeight: 600 }}>{driver.fullName}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      #{driver.driverNumber} {driver.code ? `• ${driver.code}` : ""}
-                    </Typography>
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                      <Avatar
+                        src={driver.headshotUrl}
+                        alt={driver.fullName}
+                        sx={{ width: 30, height: 30, bgcolor: "primary.main", fontSize: 12 }}
+                      >
+                        {driver.code || driver.fullName.slice(0, 1)}
+                      </Avatar>
+                      <Box>
+                        <Typography sx={{ fontWeight: 600 }}>{driver.fullName}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          #{driver.driverNumber} {driver.code ? `• ${driver.code}` : ""}
+                        </Typography>
+                      </Box>
+                    </Stack>
                   </Box>
-                </Stack>
+                </Tooltip>
               </TableCell>
               <TableCell>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  {driver.teamColor && (
-                    <Box
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        bgcolor: driver.teamColor,
-                      }}
+                <Tooltip
+                  enterTouchDelay={0}
+                  slotProps={richTooltipSlotProps}
+                  title={
+                    <TeamRichSummary
+                      name={driver.constructor}
+                      teamColor={driver.teamColor}
                     />
-                  )}
-                  <Typography variant="body2" color="text.secondary">
-                    {driver.constructor}
-                  </Typography>
-                </Stack>
+                  }
+                >
+                  <Box
+                    component="span"
+                    sx={{ display: "inline-flex", maxWidth: "100%", cursor: "help" }}
+                  >
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      {driver.teamColor && (
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor: driver.teamColor,
+                          }}
+                        />
+                      )}
+                      <Typography variant="body2" color="text.secondary">
+                        {driver.constructor}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Tooltip>
               </TableCell>
               <TableCell align="right" sx={{ color: "success.main", fontWeight: 700 }}>
                 {driver.points}

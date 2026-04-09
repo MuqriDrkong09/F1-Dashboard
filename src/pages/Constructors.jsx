@@ -9,12 +9,22 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import { richTooltipSlotProps } from "../components/DriverRichSummary";
+import TeamRichSummary from "../components/TeamRichSummary";
 import {
+  getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../services/openf1";
 
 const TEAM_COLORS = ["primary", "error", "warning", "info", "success"];
+
+function normTeam(name) {
+  return String(name ?? "")
+    .trim()
+    .toLowerCase();
+}
 
 export default function Constructors() {
   const [teams, setTeams] = useState([]);
@@ -39,10 +49,26 @@ export default function Constructors() {
           throw new Error("Could not resolve latest race session");
         }
 
-        const teamStandings = await getTeamChampionshipBySession(
-          sessionKey,
-          controller.signal,
-        );
+        const [teamStandings, driversRaw] = await Promise.all([
+          getTeamChampionshipBySession(sessionKey, controller.signal),
+          getDriversBySession(sessionKey, controller.signal),
+        ]);
+
+        const driversList = Array.isArray(driversRaw) ? driversRaw : [];
+
+        const rosterByTeam = new Map();
+        for (const d of driversList) {
+          const k = normTeam(d.team_name);
+          if (!rosterByTeam.has(k)) rosterByTeam.set(k, []);
+          rosterByTeam.get(k).push({
+            number: d.driver_number,
+            name: d.full_name ?? `#${d.driver_number}`,
+            acronym: d.name_acronym ?? "",
+          });
+        }
+        for (const list of rosterByTeam.values()) {
+          list.sort((a, b) => Number(a.number) - Number(b.number));
+        }
 
         const mapped = teamStandings
           .sort(
@@ -50,12 +76,25 @@ export default function Constructors() {
               Number(a.position_current ?? 999) -
               Number(b.position_current ?? 999),
           )
-          .map((team, index) => ({
-            name: team.team_name ?? "Unknown Team",
-            points: Number(team.points_current ?? 0),
-            position: Number(team.position_current ?? index + 1),
-            color: TEAM_COLORS[index % TEAM_COLORS.length],
-          }));
+          .map((team, index) => {
+            const name = team.team_name ?? "Unknown Team";
+            const key = normTeam(name);
+            const roster = rosterByTeam.get(key) ?? [];
+            const firstDriver = driversList.find(
+              (d) => normTeam(d.team_name) === key,
+            );
+            const teamColor = firstDriver?.team_colour
+              ? `#${firstDriver.team_colour}`
+              : "";
+            return {
+              name,
+              points: Number(team.points_current ?? 0),
+              position: Number(team.position_current ?? index + 1),
+              color: TEAM_COLORS[index % TEAM_COLORS.length],
+              roster,
+              teamColor,
+            };
+          });
 
         setTeams(mapped);
       } catch (err) {
@@ -95,18 +134,27 @@ export default function Constructors() {
           <Grid container spacing={2}>
             {teams.map((team) => (
               <Grid key={team.name} size={{ xs: 12, sm: 6 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    bgcolor: "background.paper",
-                    borderColor: "divider",
-                    transition: "transform 0.2s ease, border-color 0.2s ease",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      borderColor: "primary.main",
-                    },
-                  }}
+                <Tooltip
+                  enterTouchDelay={0}
+                  slotProps={richTooltipSlotProps}
+                  title={
+                    <TeamRichSummary
+                      name={team.name}
+                      teamColor={team.teamColor}
+                      position={team.position}
+                      points={team.points}
+                      roster={team.roster}
+                    />
+                  }
                 >
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      bgcolor: "background.paper",
+                      borderColor: "divider",
+                      cursor: "help",
+                    }}
+                  >
                   <CardContent>
                     <Box
                       sx={{
@@ -134,6 +182,7 @@ export default function Constructors() {
                     </Typography>
                   </CardContent>
                 </Card>
+                </Tooltip>
               </Grid>
             ))}
           </Grid>

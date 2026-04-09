@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Races from "./Races";
 import { getMeetingsByYear } from "../services/openf1";
 
@@ -13,7 +14,11 @@ describe("Races page", () => {
 
   it("shows loading state", () => {
     getMeetingsByYear.mockReturnValue(new Promise(() => {}));
-    render(<Races />);
+    render(
+      <MemoryRouter>
+        <Races />
+      </MemoryRouter>,
+    );
     expect(screen.getByText("Loading race calendar...")).toBeInTheDocument();
   });
 
@@ -29,9 +34,17 @@ describe("Races page", () => {
       },
     ]);
 
-    render(<Races />);
+    render(
+      <MemoryRouter>
+        <Races />
+      </MemoryRouter>,
+    );
     await waitFor(() =>
       expect(screen.getByText(/Round 1: Bahrain Grand Prix/)).toBeInTheDocument(),
+    );
+    expect(screen.getByRole("link", { name: /view sessions/i })).toHaveAttribute(
+      "href",
+      "/races/1",
     );
   });
 });

@@ -1,15 +1,18 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import RaceCard from "./RaceCard";
 
 describe("RaceCard", () => {
   it("renders race details", () => {
     render(
-      <RaceCard
-        raceName="Round 1: Bahrain Grand Prix"
-        circuit="Bahrain International Circuit"
-        country="Bahrain"
-        date="03/02/2026"
-      />,
+      <MemoryRouter>
+        <RaceCard
+          raceName="Round 1: Bahrain Grand Prix"
+          circuit="Bahrain International Circuit"
+          country="Bahrain"
+          date="03/02/2026"
+        />
+      </MemoryRouter>,
     );
 
     expect(screen.getByText("Round 1: Bahrain Grand Prix")).toBeInTheDocument();

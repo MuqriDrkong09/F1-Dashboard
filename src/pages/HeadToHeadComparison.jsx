@@ -3,6 +3,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
 import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
 import FormControl from "@mui/material/FormControl";
@@ -18,7 +19,9 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import DriverRichSummary, { richTooltipSlotProps } from "../components/DriverRichSummary";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
@@ -63,6 +66,10 @@ export default function HeadToHeadComparison() {
             id: Number(driver.driver_number),
             name: driver.full_name ?? `#${driver.driver_number}`,
             team: driver.team_name ?? "Unknown Team",
+            acronym: driver.name_acronym ?? "",
+            headshotUrl: driver.headshot_url ?? "",
+            teamColor: driver.team_colour ? `#${driver.team_colour}` : "",
+            broadcastName: driver.broadcast_name ?? "",
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -148,6 +155,51 @@ export default function HeadToHeadComparison() {
     ];
   }, [first, second, firstResult, secondResult]);
 
+  const comparisonTooltipTitle = useMemo(() => {
+    if (!first || !second) return null;
+
+    const sessionFinishFromResult = (r) =>
+      r
+        ? {
+            position: r.position,
+            laps: Number(r.number_of_laps ?? 0),
+            gap:
+              r.gap_to_leader === 0
+                ? "Leader"
+                : String(r.gap_to_leader ?? "N/A"),
+            duration:
+              typeof r.duration === "number"
+                ? `${Number(r.duration).toFixed(3)}s`
+                : "N/A",
+          }
+        : null;
+
+    return (
+      <Stack spacing={2} divider={<Divider flexItem />}>
+        <DriverRichSummary
+          fullName={first.name}
+          driverNumber={first.id}
+          code={first.acronym}
+          headshotUrl={first.headshotUrl}
+          teamName={first.team}
+          teamColor={first.teamColor}
+          broadcastName={first.broadcastName}
+          sessionFinish={sessionFinishFromResult(firstResult)}
+        />
+        <DriverRichSummary
+          fullName={second.name}
+          driverNumber={second.id}
+          code={second.acronym}
+          headshotUrl={second.headshotUrl}
+          teamName={second.team}
+          teamColor={second.teamColor}
+          broadcastName={second.broadcastName}
+          sessionFinish={sessionFinishFromResult(secondResult)}
+        />
+      </Stack>
+    );
+  }, [first, second, firstResult, secondResult]);
+
   return (
     <Box component="main" sx={{ py: { xs: 3, sm: 4, md: 6 } }}>
       <Container maxWidth="lg">
@@ -204,16 +256,35 @@ export default function HeadToHeadComparison() {
               </Grid>
             </Grid>
 
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
-                  {first?.name ?? "Driver A"} vs {second?.name ?? "Driver B"}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {first?.team ?? "N/A"} vs {second?.team ?? "N/A"}
-                </Typography>
-              </CardContent>
-            </Card>
+            {comparisonTooltipTitle ? (
+              <Tooltip
+                enterTouchDelay={0}
+                slotProps={richTooltipSlotProps}
+                title={comparisonTooltipTitle}
+              >
+                <Card variant="outlined" sx={{ cursor: "help" }}>
+                  <CardContent>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                      {first?.name ?? "Driver A"} vs {second?.name ?? "Driver B"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {first?.team ?? "N/A"} vs {second?.team ?? "N/A"}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Tooltip>
+            ) : (
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                    {first?.name ?? "Driver A"} vs {second?.name ?? "Driver B"}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {first?.team ?? "N/A"} vs {second?.team ?? "N/A"}
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
 
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">

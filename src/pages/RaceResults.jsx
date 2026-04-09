@@ -12,6 +12,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import DriverRichSummary, { richTooltipSlotProps } from "../components/DriverRichSummary";
+import TeamRichSummary from "../components/TeamRichSummary";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
@@ -50,19 +53,36 @@ export default function RaceResults() {
         const mapped = sessionResults
           .map((item) => {
             const driver = driversByNumber.get(item.driver_number);
+            const gap =
+              item.gap_to_leader === 0
+                ? "Leader"
+                : String(item.gap_to_leader ?? "N/A");
+            const duration =
+              typeof item.duration === "number"
+                ? `${item.duration.toFixed(3)}s`
+                : "N/A";
+            const teamColor = driver?.team_colour
+              ? `#${driver.team_colour}`
+              : "";
+            const driverMeta = driver
+              ? {
+                  fullName: driver.full_name ?? `#${item.driver_number}`,
+                  driverNumber: driver.driver_number,
+                  code: driver.name_acronym ?? "",
+                  headshotUrl: driver.headshot_url ?? "",
+                  teamName: driver.team_name ?? "Unknown Team",
+                  teamColor,
+                  broadcastName: driver.broadcast_name ?? "",
+                }
+              : null;
             return {
               position: Number(item.position ?? 999),
               driver: driver?.full_name ?? `#${item.driver_number}`,
               team: driver?.team_name ?? "Unknown Team",
               laps: Number(item.number_of_laps ?? 0),
-              gap:
-                item.gap_to_leader === 0
-                  ? "Leader"
-                  : String(item.gap_to_leader ?? "N/A"),
-              duration:
-                typeof item.duration === "number"
-                  ? `${item.duration.toFixed(3)}s`
-                  : "N/A",
+              gap,
+              duration,
+              driverMeta,
             };
           })
           .sort((a, b) => a.position - b.position);
@@ -132,8 +152,51 @@ export default function RaceResults() {
                       <TableCell sx={{ fontWeight: 700, color: "primary.main" }}>
                         {row.position}
                       </TableCell>
-                      <TableCell>{row.driver}</TableCell>
-                      <TableCell>{row.team}</TableCell>
+                      <TableCell>
+                        {row.driverMeta ? (
+                          <Tooltip
+                            enterTouchDelay={0}
+                            slotProps={richTooltipSlotProps}
+                            title={
+                              <DriverRichSummary
+                                {...row.driverMeta}
+                                sessionFinish={{
+                                  position: row.position,
+                                  laps: row.laps,
+                                  gap: row.gap,
+                                  duration: row.duration,
+                                }}
+                              />
+                            }
+                          >
+                            <Box component="span" sx={{ cursor: "help" }}>
+                              {row.driver}
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          row.driver
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {row.driverMeta ? (
+                          <Tooltip
+                            enterTouchDelay={0}
+                            slotProps={richTooltipSlotProps}
+                            title={
+                              <TeamRichSummary
+                                name={row.team}
+                                teamColor={row.driverMeta.teamColor}
+                              />
+                            }
+                          >
+                            <Box component="span" sx={{ cursor: "help" }}>
+                              {row.team}
+                            </Box>
+                          </Tooltip>
+                        ) : (
+                          row.team
+                        )}
+                      </TableCell>
                       <TableCell align="right">{row.laps}</TableCell>
                       <TableCell align="right">{row.gap}</TableCell>
                       <TableCell align="right">{row.duration}</TableCell>

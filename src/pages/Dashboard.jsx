@@ -146,11 +146,6 @@ export default function Dashboard() {
                   sx={{
                     bgcolor: "background.paper",
                     borderColor: "divider",
-                    transition: "transform 0.2s ease, border-color 0.2s ease",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      borderColor: "primary.main",
-                    },
                   }}
                 >
                   <CardContent>

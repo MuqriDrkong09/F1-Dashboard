@@ -19,8 +19,8 @@ Use these endpoints to build race calendars, upcoming races, countdowns, and cir
 
 | Endpoint | Description | Example URL |
 | --- | --- | --- |
-| `meetings` | List race meetings for a year (circuit, country, dates, keys) | `https://api.openf1.org/v1/meetings?year=2025` |
-| `meeting` | Details for one race meeting by `meeting_key` | `https://api.openf1.org/v1/meeting?meeting_key=1219` |
+| `meetings` | List race meetings for a year; optional **`country_name`** filter | `https://api.openf1.org/v1/meetings?year=2025` · `https://api.openf1.org/v1/meetings?year=2026&country_name=Singapore` |
+| `meeting` | Details for one race meeting by `meeting_key` (may 404 for some keys; app falls back to `meetings?year=`) | `https://api.openf1.org/v1/meeting?meeting_key=1219` |
 
 ### 2) Drivers
 
@@ -65,7 +65,8 @@ Current integration uses:
   - Dashboard
   - Drivers
   - Constructors
-  - Races
+  - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`)
+  - Line-ups (`/team-drivers`: teams + drivers for latest session)
 - MUI-based responsive UI and components
 - Driver standings fetched from live API data
 - Recharts line chart for driver points progression
@@ -129,24 +130,22 @@ npm.cmd run test:coverage
 - [x] Jest testing setup completed and test suites passing
 - [x] Tests for newer pages (`CountdownTimer`, `DriverProfiles`, `RaceResults`, `HeadToHeadComparison`)
 - [x] Coverage report and threshold enforcement (`npm.cmd run test:coverage`)
+- [x] Route transitions (fade + slide) between pages (`App.jsx` + `prefers-reduced-motion`)
+- [x] Stronger card hover (lift, subtle scale, deeper shadow) via `theme.js` `MuiCard` overrides
+- [x] Session list per race UI: `RaceMeetingSessions` at `/races/:meetingKey` (from calendar **View sessions**)
+- [x] Team–driver line-ups: `TeamDriverMapping` at `/team-drivers` (`championship_teams` + `drivers?session_key=`)
+- [x] Tooltips/popups with richer driver/team details (`DriverRichSummary` / `TeamRichSummary` on standings, race results, constructors, line-ups, head-to-head, profiles)
+- [x] Bundle optimization via lazy loading/code splitting (`React.lazy` per route in `App.jsx`, `Suspense` + `PageRouteFallback`)
 
-### Not Done Yet
+### Media Feature Checklist
 
-- [ ] Session list per race UI (`meetings -> sessions`)
-- [ ] Team-driver mapping view (`drivers?session_key=` + `championship_teams`)
-- [ ] Driver points progression across multiple races/sessions
-- [ ] Constructor points progression graph across sessions
-- [ ] Lap/position charts for race analysis
-- [ ] Circuit info panel with richer track metadata
-- [ ] Global filters (season / driver / team / circuit)
-- [ ] Search functionality for drivers/teams
-- [ ] Tooltips/popups with richer driver/team details
-- [ ] Bundle optimization via lazy loading/code splitting
+- [ ] Media gallery page (images + videos)
+- [ ] Embedded video section (official/allowed sources)
+- [ ] Accessibility basics (alt text + captions)
+- [ ] Media performance basics (lazy loading + optimized file sizes)
 
 ### UI/Animation Enhancements (Later)
 
-- [ ] Add route transitions (fade/slide) between pages
-- [ ] Add stronger card hover depth and subtle scale effects
 - [ ] Add skeleton loaders to all API-backed pages
 - [ ] Add sticky table headers for standings/results tables
 - [ ] Add podium styling (gold/silver/bronze) in `RaceResults`

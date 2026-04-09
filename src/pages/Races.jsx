@@ -49,6 +49,7 @@ export default function Races() {
 
     return (upcoming.length > 0 ? upcoming : sorted).map((meeting, index) => ({
       id: meeting.meeting_key ?? `${meeting.meeting_name}-${index}`,
+      meetingKey: meeting.meeting_key,
       round: index + 1,
       raceName: meeting.meeting_name ?? "Unknown Grand Prix",
       circuit: meeting.circuit_short_name ?? "Unknown Circuit",
@@ -93,6 +94,7 @@ export default function Races() {
                   circuit={race.circuit}
                   country={race.country}
                   date={race.date}
+                  meetingKey={race.meetingKey}
                 />
               </Box>
             ))}

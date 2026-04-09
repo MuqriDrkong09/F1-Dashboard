@@ -10,6 +10,8 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import DriverRichSummary, { richTooltipSlotProps } from "../components/DriverRichSummary";
 import {
   getDriversBySession,
   getLatestDriverChampionship,
@@ -46,6 +48,7 @@ export default function DriverProfiles() {
             number: driver.driver_number,
             headshot: driver.headshot_url ?? "",
             teamColor: driver.team_colour ? `#${driver.team_colour}` : "",
+            broadcastName: driver.broadcast_name ?? "",
           }));
 
         setDrivers(mapped);
@@ -79,7 +82,22 @@ export default function DriverProfiles() {
           <Grid container spacing={2}>
             {drivers.map((driver) => (
               <Grid key={driver.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Card variant="outlined">
+                <Tooltip
+                  enterTouchDelay={0}
+                  slotProps={richTooltipSlotProps}
+                  title={
+                    <DriverRichSummary
+                      fullName={driver.fullName}
+                      driverNumber={driver.number}
+                      code={driver.acronym}
+                      headshotUrl={driver.headshot}
+                      teamName={driver.team}
+                      teamColor={driver.teamColor}
+                      broadcastName={driver.broadcastName}
+                    />
+                  }
+                >
+                  <Card variant="outlined" sx={{ cursor: "help", height: "100%" }}>
                   <CardContent>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar
@@ -125,6 +143,7 @@ export default function DriverProfiles() {
                     )}
                   </CardContent>
                 </Card>
+                </Tooltip>
               </Grid>
             ))}
           </Grid>

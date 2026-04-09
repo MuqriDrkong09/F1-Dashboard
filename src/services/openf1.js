@@ -53,8 +53,13 @@ export async function getDriversBySession(sessionKey, signal) {
   return Array.isArray(data) ? data : [];
 }
 
-export async function getMeetingsByYear(year, signal) {
-  const data = await fetchOpenF1(`/meetings?year=${year}`, signal);
+/** Pass `{ country_name: "Singapore" }` as the third argument to match OpenF1 `meetings` filters. */
+export async function getMeetingsByYear(year, signal, options = {}) {
+  const params = new URLSearchParams({ year: String(year) });
+  if (options.country_name != null && String(options.country_name).trim() !== "") {
+    params.set("country_name", String(options.country_name).trim());
+  }
+  const data = await fetchOpenF1(`/meetings?${params.toString()}`, signal);
 
   return Array.isArray(data) ? data : [];
 }
@@ -63,6 +68,51 @@ export async function getMeetingByKey(meetingKey, signal) {
   const data = await fetchOpenF1(`/meeting?meeting_key=${meetingKey}`, signal);
 
   return Array.isArray(data) ? data[0] ?? null : data ?? null;
+}
+
+/**
+ * Resolves meeting metadata for a detail view. OpenF1 sometimes returns 404 for
+ * `/meeting?meeting_key=` even when `sessions?meeting_key=` works; we fall back to
+ * `meetings?year=` (see `preferredYears`), then a minimal placeholder.
+ */
+export async function resolveMeetingForDetail(meetingKey, signal, options = {}) {
+  const key = Number(meetingKey);
+  if (!Number.isFinite(key)) {
+    return null;
+  }
+
+  let row = null;
+  try {
+    row = await getMeetingByKey(key, signal);
+  } catch (err) {
+    if (err.name === "AbortError") throw err;
+    const is404 = /\(\s*404\s*\)/.test(String(err.message ?? ""));
+    if (!is404) throw err;
+  }
+
+  if (row) return row;
+
+  const currentYear = new Date().getUTCFullYear();
+  const preferred = Array.isArray(options.preferredYears)
+    ? options.preferredYears
+        .map((y) => Number(y))
+        .filter((y) => Number.isFinite(y))
+    : [];
+  const fallbackYears =
+    preferred.length > 0
+      ? [...new Set(preferred)]
+      : [currentYear, currentYear - 1];
+
+  for (const year of fallbackYears) {
+    const meetings = await getMeetingsByYear(year, signal);
+    const hit = meetings.find((m) => Number(m.meeting_key) === key);
+    if (hit) return hit;
+  }
+
+  return {
+    meeting_key: key,
+    meeting_name: `Meeting ${key}`,
+  };
 }
 
 export async function getSessionResults(sessionKey, signal) {

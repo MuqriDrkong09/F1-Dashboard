@@ -1,11 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import Constructors from "./Constructors";
 import {
+  getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../services/openf1";
 
 jest.mock("../services/openf1", () => ({
+  getDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
   getTeamChampionshipBySession: jest.fn(),
 }));
@@ -29,6 +31,7 @@ describe("Constructors page", () => {
 
   it("renders error state", async () => {
     getLatestDriverChampionship.mockResolvedValue([]);
+    getDriversBySession.mockResolvedValue([]);
     getTeamChampionshipBySession.mockResolvedValue([]);
 
     render(<Constructors />);

@@ -57,7 +57,7 @@ export function useDriverStandings() {
           return {
             position: Number(entry.position_current),
             points: Number(entry.points_current ?? 0),
-            wins: 0,
+            wins: Number(entry.wins ?? entry.wins_current ?? 0),
             code: driver?.name_acronym ?? "",
             fullName,
             broadcastName: driver?.broadcast_name ?? "",
