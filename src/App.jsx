@@ -318,6 +318,7 @@ export default function App() {
       >
         <Suspense fallback={<PageRouteFallback />}>
           <Routes>
+            {/* App entry: send root URL straight to Dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/drivers" element={<Drivers />} />

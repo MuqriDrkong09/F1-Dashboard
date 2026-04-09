@@ -2,6 +2,8 @@
 
 A modern Formula 1 dashboard built with React, Vite, MUI, Recharts, and OpenF1 data.
 
+**Entry point:** Visiting `/` redirects to **`/dashboard`** (the Dashboard page). Local dev (`npm run dev`) opens **`/dashboard`** directly when the browser is launched from Vite.
+
 ## Why I Chose F1
 
 Formula 1 is a great fit for a data-driven frontend project because it has:
@@ -61,8 +63,9 @@ Current integration uses:
 
 ## Features Implemented
 
+- **Default route:** `/` → **`/dashboard`** (React Router `Navigate` in `App.jsx`)
 - Multi-page React app with routing:
-  - Dashboard
+  - Dashboard (`/dashboard`)
   - Drivers
   - Constructors
   - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`)
@@ -100,7 +103,7 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-Then open `http://localhost:5173`.
+Then open `http://localhost:5173` (root redirects to `/dashboard`), or use the tab Vite opens — it targets **`/dashboard`** via `vite.config.js` `server.open`.
 
 Run tests with coverage (enforces thresholds from `jest.config.cjs`):
 
@@ -112,6 +115,7 @@ npm.cmd run test:coverage
 
 ### Done
 
+- [x] Default landing: `/` redirects to **Dashboard** at `/dashboard` (`App.jsx`); dev server opens `/dashboard` when launching the browser (`vite.config.js` `server.open`)
 - [x] Vite + React project setup completed
 - [x] UI migrated to MUI
 - [x] Core pages implemented (`Dashboard`, `Drivers`, `Constructors`, `Races`)
@@ -136,6 +140,11 @@ npm.cmd run test:coverage
 - [x] Team–driver line-ups: `TeamDriverMapping` at `/team-drivers` (`championship_teams` + `drivers?session_key=`)
 - [x] Tooltips/popups with richer driver/team details (`DriverRichSummary` / `TeamRichSummary` on standings, race results, constructors, line-ups, head-to-head, profiles)
 - [x] Bundle optimization via lazy loading/code splitting (`React.lazy` per route in `App.jsx`, `Suspense` + `PageRouteFallback`)
+
+### Layout & recognition (Later)
+
+- [ ] Site-wide **footer** (e.g. copyright year, nav links, link to acknowledgements)
+- [ ] **Acknowledgement / Recognition** page (credits: [OpenF1](https://openf1.org) API, data/third-party notices, F1® trademark disclaimer as appropriate) + route (e.g. `/acknowledgements`) and link from footer
 
 ### UI/Animation Enhancements (Later)
 
