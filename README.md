@@ -58,7 +58,7 @@ Returned fields include points and championship positions per driver/team.
 
 Current integration uses:
 - `src/hooks/useDriverStandings.js`
-- `https://api.openf1.org/v1/championship_drivers?session_key=latest`
+- `https://api.openf1.org/v1/championship_drivers?session_key=latest` (tried first; OpenF1 may 404, then `src/services/openf1.js` resolves the latest completed Grand Prix via `sessions?year=` and calls `championship_drivers?session_key=<numeric>`)
 - `https://api.openf1.org/v1/drivers?session_key=<resolved_session_key>`
 
 ## Features Implemented
@@ -93,8 +93,8 @@ Current integration uses:
   - Workaround: used `npm.cmd` / `npx.cmd` commands.
 
 - **OpenF1 session endpoint availability**
-  - Some `championship_drivers` session keys return 404.
-  - Fix: query standings via `session_key=latest`, then fetch matching driver metadata with the resolved `session_key`.
+  - Some `championship_drivers` session keys return 404; `session_key=latest` for that endpoint can also 404.
+  - Fix: try `latest`, then resolve the latest completed Sunday race from `sessions?year=` and query `championship_drivers` + driver metadata with that numeric `session_key`.
 
 - **Bundle size warning after adding charts**
   - Recharts increased bundle size and triggered a warning.
@@ -131,8 +131,9 @@ npm.cmd run test:coverage
   - [x] `meetings?year=`
   - [x] `meeting?meeting_key=`
   - [x] `sessions?meeting_key=`
+  - [x] `sessions?year=` (standings fallback: latest completed Grand Prix)
   - [x] `drivers?session_key=`
-  - [x] `championship_drivers?session_key=latest`
+  - [x] `championship_drivers` (`session_key=latest` with `sessions?year=` fallback)
   - [x] `championship_teams?session_key=...`
   - [x] `session_result?session_key=...`
 - [x] Hardcoded data removed from key pages and replaced by API-driven content
@@ -156,3 +157,23 @@ npm.cmd run test:coverage
 - [x] Add animated active nav indicator
 - [x] Add animated number count-up for dashboard metrics
 - [x] Add dark/light theme toggle with persistence
+
+### Planned
+
+- [ ] **Dashboard news:** add a **News** section on the Dashboard; each item is clickable and opens a dedicated **article page** (route + lazy page) showing the related **article body** and **media** (e.g. images, video embeds, galleries—whatever the content model supports).
+
+#### Feature architecture (News)
+
+```text
+Dashboard
+   └── Latest F1 News (preview cards)
+
+News Article Page
+   └── Full article details
+   └── image
+   └── source link
+   └── related articles
+```
+
+- **Dashboard** — surface **Latest F1 News** as **preview cards** (title, teaser, optional hero thumb, date); card click navigates to the article route.
+- **News Article Page** — **full article** copy, a primary **image** (or hero media), an external **source link** (attribution / “read original”), and a **related articles** block (same feed, filtered or ranked).
