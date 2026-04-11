@@ -161,12 +161,19 @@ npm.cmd run test:coverage
 ### Planned
 
 - [ ] **Dashboard news:** add a **News** section on the Dashboard; each item is clickable and opens a dedicated **article page** (route + lazy page) showing the related **article body** and **media** (e.g. images, video embeds, galleries—whatever the content model supports).
+- [ ] **News in the main nav:** add a **News** item to the site navigation (toolbar / drawer) so users can open a dedicated **F1 news listing** route (`/news` or similar) without going through the Dashboard; the listing reuses the same feed as the Dashboard previews but shows the full scrollable list (filters or pagination optional).
 
 #### Feature architecture (News)
 
 ```text
+Site navigation
+   └── News → F1 news listing (full feed)
+
 Dashboard
-   └── Latest F1 News (preview cards)
+   └── Latest F1 News (preview cards; subset of same feed)
+
+News listing page
+   └── All items / paginated or filtered list → article route
 
 News Article Page
    └── Full article details
@@ -175,5 +182,7 @@ News Article Page
    └── related articles
 ```
 
+- **Navigation** — **News** link alongside existing routes; highlights when active on listing or article pages.
+- **News listing page** — dedicated route for the **full F1 news feed** (same data source as Dashboard cards); each row or card opens the article route.
 - **Dashboard** — surface **Latest F1 News** as **preview cards** (title, teaser, optional hero thumb, date); card click navigates to the article route.
 - **News Article Page** — **full article** copy, a primary **image** (or hero media), an external **source link** (attribution / “read original”), and a **related articles** block (same feed, filtered or ranked).
