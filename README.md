@@ -192,4 +192,4 @@ News Article Page
 - **Navigation** — **News** link; active on `/news` and `/news/article/...`.
 - **News listing page** — GNews search `Formula 1`, English; cards link to the article route.
 - **Dashboard** — preview strip + **View all** → `/news`.
-- **News Article Page** — resolves the article by URL (base64url key); refetches search (`max=100`) to fill **related** cards; GNews does not expose galleries/video embeds in this integration.
+- **News Article Page** — resolves the article by URL (base64url key); refetches search (`max=100`) for **related** cards; shows a **GNews summary** plus an **embedded iframe** of the publisher URL so the full story can be read in-app when the site allows framing (otherwise use **Open in new tab**).

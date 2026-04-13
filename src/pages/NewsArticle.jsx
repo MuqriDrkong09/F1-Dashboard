@@ -37,6 +37,16 @@ function formatNewsDate(iso) {
   }).format(t);
 }
 
+function isEmbeddableArticleUrl(url) {
+  if (typeof url !== "string" || url.trim() === "") return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 export default function NewsArticle() {
   const { articleKey } = useParams();
   const canonicalUrl = useMemo(
@@ -168,26 +178,75 @@ export default function NewsArticle() {
               </Stack>
             </Box>
 
+            {bodyText ? (
+              <Box component="section" aria-labelledby="news-article-summary-heading">
+                <Typography
+                  id="news-article-summary-heading"
+                  variant="subtitle2"
+                  sx={{ fontWeight: 700, letterSpacing: 0.5, mb: 1 }}
+                >
+                  Summary (GNews)
+                </Typography>
+                <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+                  {bodyText}
+                </Typography>
+              </Box>
+            ) : isEmbeddableArticleUrl(article.url) ? (
+              <Typography variant="body2" color="text.secondary">
+                GNews did not return extra preview text for this story; the publisher page is embedded
+                below.
+              </Typography>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No preview text from GNews for this URL. Use &quot;Open in new tab&quot; to read the
+                full article.
+              </Typography>
+            )}
+
+            {isEmbeddableArticleUrl(article.url) ? (
+              <Box component="section" aria-labelledby="news-article-embed-heading">
+                <Typography
+                  id="news-article-embed-heading"
+                  variant="subtitle2"
+                  sx={{ fontWeight: 700, letterSpacing: 0.5, mb: 1 }}
+                >
+                  Full article
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+                  The publisher page is embedded below so you can read it here. If you see a blank
+                  area, the site may block embedding — use &quot;Open in new tab&quot; instead.
+                </Typography>
+                <Box
+                  component="iframe"
+                  src={article.url}
+                  title={`Full article: ${article.title}`}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                  sx={{
+                    display: "block",
+                    width: "100%",
+                    minHeight: { xs: "70vh", md: "75vh" },
+                    border: 1,
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    bgcolor: "background.paper",
+                  }}
+                />
+              </Box>
+            ) : null}
+
             <Button
               component="a"
               href={article.url}
               target="_blank"
               rel="noopener noreferrer"
-              variant="contained"
+              variant="outlined"
+              size="small"
               endIcon={<OpenInNew />}
             >
-              Read original
+              Open in new tab
             </Button>
-
-            {bodyText ? (
-              <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
-                {bodyText}
-              </Typography>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                No preview text available. Use &quot;Read original&quot; for the full story.
-              </Typography>
-            )}
 
             {related.length > 0 ? (
               <>

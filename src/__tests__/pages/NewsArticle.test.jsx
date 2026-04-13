@@ -55,6 +55,8 @@ describe("NewsArticle page", () => {
       expect(screen.getByRole("heading", { name: "Story title" })).toBeInTheDocument(),
     );
     expect(screen.getByText("Body text")).toBeInTheDocument();
+    expect(screen.getByTitle("Full article: Story title")).toHaveAttribute("src", url);
+    expect(screen.getByRole("link", { name: /open in new tab/i })).toHaveAttribute("href", url);
     expect(screen.getByRole("heading", { name: "Related articles" })).toBeInTheDocument();
     expect(screen.getByText("Other")).toBeInTheDocument();
   });
