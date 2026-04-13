@@ -392,3 +392,39 @@ export function CountdownSkeleton() {
     </LoadingStateRegion>
   );
 }
+
+export function NewsGridSkeleton({ cards = 8 }) {
+  return (
+    <LoadingStateRegion label="Loading Formula 1 news">
+      <Grid container spacing={2}>
+        {Array.from({ length: cards }, (_, i) => (
+          <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Card variant="outlined">
+              <Skeleton sx={wave()} variant="rectangular" height={140} />
+              <CardContent>
+                <Skeleton sx={wave()} width="90%" height={24} />
+                <Skeleton sx={wave({ mt: 1 })} width="100%" height={18} />
+                <Skeleton sx={wave({ mt: 0.5 })} width="70%" height={18} />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </LoadingStateRegion>
+  );
+}
+
+export function NewsArticleSkeleton() {
+  return (
+    <LoadingStateRegion label="Loading article">
+      <Skeleton sx={wave()} variant="rectangular" height={220} />
+      <Box sx={{ mt: 3 }}>
+        <Skeleton sx={wave()} width="75%" height={40} />
+        <Skeleton sx={wave({ mt: 2 })} width="40%" height={22} />
+        <Skeleton sx={wave({ mt: 3 })} width="100%" height={18} />
+        <Skeleton sx={wave({ mt: 1 })} width="100%" height={18} />
+        <Skeleton sx={wave({ mt: 1 })} width="92%" height={18} />
+      </Box>
+    </LoadingStateRegion>
+  );
+}

@@ -142,16 +142,9 @@ describe("openf1 service", () => {
     });
   });
 
-  it("getLatestDriverChampionship falls back when latest returns 404", async () => {
+  it("getLatestDriverChampionship resolves session from /sessions then loads standings", async () => {
     fetch.mockImplementation((url) => {
       const u = String(url);
-      if (u.includes("championship_drivers?session_key=latest")) {
-        return Promise.resolve({
-          ok: false,
-          status: 404,
-          headers: { get: () => null },
-        });
-      }
       if (u.includes("/sessions?year=2026")) {
         return Promise.resolve({ ok: true, json: async () => [] });
       }
@@ -185,25 +178,57 @@ describe("openf1 service", () => {
       await expect(getLatestDriverChampionship()).resolves.toEqual([
         { session_key: 100, position: 1 },
       ]);
+      expect(
+        fetch.mock.calls.some((c) => String(c[0]).includes("session_key=latest")),
+      ).toBe(false);
     } finally {
       ySpy.mockRestore();
     }
   });
 
-  it("getLatestDriverChampionship rethrows non-404 errors from latest", async () => {
-    fetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      headers: { get: () => null },
+  it("getLatestDriverChampionship rethrows non-ok responses from championship fetch", async () => {
+    fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes("/sessions?year=2026")) {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (u.includes("/sessions?year=2025")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [
+            {
+              session_key: 7,
+              session_type: "Race",
+              session_name: "Race",
+              date_start: "2025-01-01T00:00:00+00:00",
+              date_end: "2025-01-01T02:00:00+00:00",
+            },
+          ],
+        });
+      }
+      if (u.includes("championship_drivers?session_key=7")) {
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          headers: { get: () => null },
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
 
-    await expect(getLatestDriverChampionship()).rejects.toThrow(
-      "OpenF1 request failed (500)",
-    );
+    const ySpy = jest.spyOn(Date.prototype, "getUTCFullYear").mockReturnValue(2026);
+    try {
+      await expect(getLatestDriverChampionship()).rejects.toThrow(
+        "OpenF1 request failed (500)",
+      );
+    } finally {
+      ySpy.mockRestore();
+    }
   });
 
   it("retries once on 429 then succeeds", async () => {
     jest.useFakeTimers();
+    const randSpy = jest.spyOn(Math, "random").mockReturnValue(0);
     const headers429 = { get: () => null };
     fetch
       .mockResolvedValueOnce({
@@ -220,6 +245,7 @@ describe("openf1 service", () => {
     await jest.runAllTimersAsync();
     await expect(promise).resolves.toEqual([]);
     expect(fetch).toHaveBeenCalledTimes(2);
+    randSpy.mockRestore();
     jest.useRealTimers();
   });
 

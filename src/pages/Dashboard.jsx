@@ -1,17 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
 import CountUpNumber from "../components/CountUpNumber";
-import { DashboardSkeleton } from "../components/ApiLoadingSkeletons";
+import { DashboardSkeleton, NewsGridSkeleton } from "../components/ApiLoadingSkeletons";
+import F1NewsArticleCard from "../components/F1NewsArticleCard";
 import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { Link as RouterLink } from "react-router-dom";
 import {
   getLatestDriverChampionship,
   getMeetingsByYear,
 } from "../services/openf1";
+import { searchFormulaOneNews } from "../services/gnews";
 
 /** @typedef {{ label: string } & (
  *   | { kind: "text"; text: string }
@@ -84,6 +89,10 @@ export default function Dashboard() {
   const [statCards, setStatCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [newsArticles, setNewsArticles] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsError, setNewsError] = useState(null);
 
   const now = useMemo(() => Date.now(), []);
 
@@ -177,6 +186,28 @@ export default function Dashboard() {
     return () => controller.abort();
   }, [now]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadNews() {
+      setNewsLoading(true);
+      setNewsError(null);
+      try {
+        const items = await searchFormulaOneNews({ max: 5, signal: controller.signal });
+        if (controller.signal.aborted) return;
+        setNewsArticles(items);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        if (!controller.signal.aborted) {
+          setNewsError(err.message ?? "Could not load Formula 1 news");
+        }
+      } finally {
+        if (!controller.signal.aborted) setNewsLoading(false);
+      }
+    }
+    loadNews();
+    return () => controller.abort();
+  }, []);
+
   return (
     <Box component="main" sx={{ py: { xs: 3, sm: 4, md: 6 } }}>
       <Container maxWidth="lg">
@@ -199,7 +230,9 @@ export default function Dashboard() {
         {isLoading ? (
           <DashboardSkeleton />
         ) : error ? (
-          <Alert severity="error">{error}</Alert>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
         ) : (
           <Grid container spacing={2}>
             {statCards.map((card) => (
@@ -229,6 +262,38 @@ export default function Dashboard() {
             ))}
           </Grid>
         )}
+
+        <Box sx={{ mt: 6 }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            justifyContent="space-between"
+            sx={{ mb: 2 }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Latest F1 News
+            </Typography>
+            <Button component={RouterLink} to="/news" size="small" variant="outlined">
+              View all
+            </Button>
+          </Stack>
+          {newsLoading ? (
+            <NewsGridSkeleton cards={5} />
+          ) : newsError ? (
+            <Alert severity="warning">{newsError}</Alert>
+          ) : newsArticles.length === 0 ? (
+            <Alert severity="info">No news articles returned.</Alert>
+          ) : (
+            <Grid container spacing={2}>
+              {newsArticles.map((article) => (
+                <Grid key={article.url} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <F1NewsArticleCard article={article} compact />
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Box>
       </Container>
     </Box>
   );

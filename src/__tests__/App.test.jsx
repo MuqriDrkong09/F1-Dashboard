@@ -18,6 +18,7 @@ describe("App routing shell", () => {
     expect(screen.getByRole("button", { name: /^Schedule$/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Standings$/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Explore$/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^News$/ })).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.queryByText("Loading page…")).not.toBeInTheDocument();

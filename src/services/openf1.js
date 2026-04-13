@@ -1,5 +1,24 @@
 const OPENF1_BASE_URL = "https://api.openf1.org/v1";
 
+/** OpenF1 returns 429 with "Max 3 requests/second" — stay slightly under with spacing between request starts. */
+const OPENF1_MIN_GAP_MS = 360;
+
+let openF1RequestQueue = Promise.resolve();
+let nextOpenF1RequestStartTime = 0;
+
+/**
+ * Run `task` after all prior OpenF1 traffic (global FIFO). Used so parallel
+ * `Promise.all` / StrictMode double-mount cannot burst faster than the API limit.
+ */
+function enqueueOpenF1Task(task) {
+  const run = openF1RequestQueue.then(() => task());
+  openF1RequestQueue = run.then(
+    () => {},
+    () => {},
+  );
+  return run;
+}
+
 function delay(ms, signal) {
   if (signal?.aborted) {
     return Promise.reject(new DOMException("Aborted", "AbortError"));
@@ -17,35 +36,46 @@ function delay(ms, signal) {
   });
 }
 
-async function fetchOpenF1(path, signal, attempt = 0) {
+async function fetchOpenF1(path, signal) {
   const maxAttempts = 5;
-  const response = await fetch(`${OPENF1_BASE_URL}${path}`, { signal });
 
-  if (response.status === 429 && attempt < maxAttempts - 1) {
-    const retryAfter = response.headers.get("Retry-After");
-    const retrySec = retryAfter ? Number.parseInt(retryAfter, 10) : Number.NaN;
-    const waitMs = Number.isFinite(retrySec)
-      ? retrySec * 1000
-      : Math.min(500 * 2 ** attempt, 8000);
-    await delay(waitMs, signal);
-    return fetchOpenF1(path, signal, attempt + 1);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const response = await enqueueOpenF1Task(async () => {
+      const now = Date.now();
+      const waitMs = Math.max(0, nextOpenF1RequestStartTime - now);
+      if (waitMs > 0) {
+        await delay(waitMs, signal);
+      }
+      nextOpenF1RequestStartTime = Date.now() + OPENF1_MIN_GAP_MS;
+
+      return fetch(`${OPENF1_BASE_URL}${path}`, { signal });
+    });
+
+    if (response.status === 429 && attempt < maxAttempts - 1) {
+      const retryAfter = response.headers.get("Retry-After");
+      const retrySec = retryAfter ? Number.parseInt(retryAfter, 10) : Number.NaN;
+      const baseMs = Number.isFinite(retrySec)
+        ? retrySec * 1000
+        : Math.min(500 * 2 ** attempt, 8000);
+      const jitterMs = Math.floor(Math.random() * 350);
+      await delay(baseMs + jitterMs, signal);
+      continue;
+    }
+
+    if (!response.ok) {
+      throw new Error(`OpenF1 request failed (${response.status}) for ${path}`);
+    }
+
+    return response.json();
   }
 
-  if (!response.ok) {
-    throw new Error(`OpenF1 request failed (${response.status}) for ${path}`);
-  }
-
-  return response.json();
-}
-
-function isOpenF1NotFoundError(err) {
-  return /\(\s*404\s*\)/.test(String(err.message ?? ""));
+  throw new Error(`OpenF1: internal pacing loop exhausted for ${path}`);
 }
 
 /**
- * OpenF1 no longer reliably serves `championship_*` with `session_key=latest`.
- * We resolve the most recent completed Sunday race from `/sessions` and use
- * that numeric key (same key callers use from `standings[0].session_key`).
+ * OpenF1 returns 404 for `championship_*?session_key=latest`, so we never call it.
+ * Resolve the most recent completed Sunday GP from `/sessions` and use that
+ * numeric `session_key` (same key callers use from `standings[0].session_key`).
  */
 async function resolveLatestGrandPrixSessionKeyForChampionship(signal) {
   const currentYear = new Date().getUTCFullYear();
@@ -79,21 +109,6 @@ async function resolveLatestGrandPrixSessionKeyForChampionship(signal) {
 }
 
 export async function getLatestDriverChampionship(signal) {
-  let data;
-  try {
-    data = await fetchOpenF1(
-      "/championship_drivers?session_key=latest",
-      signal,
-    );
-  } catch (err) {
-    if (err.name === "AbortError") throw err;
-    if (!isOpenF1NotFoundError(err)) throw err;
-    data = null;
-  }
-
-  const first = Array.isArray(data) ? data : [];
-  if (first.length > 0) return first;
-
   const sessionKey = await resolveLatestGrandPrixSessionKeyForChampionship(
     signal,
   );
@@ -103,11 +118,11 @@ export async function getLatestDriverChampionship(signal) {
     );
   }
 
-  const fallback = await fetchOpenF1(
+  const data = await fetchOpenF1(
     `/championship_drivers?session_key=${sessionKey}`,
     signal,
   );
-  return Array.isArray(fallback) ? fallback : [];
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getDriversBySession(sessionKey, signal) {

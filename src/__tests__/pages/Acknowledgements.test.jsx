@@ -14,6 +14,7 @@ describe("Acknowledgements page", () => {
       screen.getByRole("heading", { name: /acknowledgements & recognition/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /openf1 api/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /gnews api/i })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /formula 1® and trademarks/i }),
     ).toBeInTheDocument();

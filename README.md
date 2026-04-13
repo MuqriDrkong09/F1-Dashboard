@@ -58,7 +58,7 @@ Returned fields include points and championship positions per driver/team.
 
 Current integration uses:
 - `src/hooks/useDriverStandings.js`
-- `https://api.openf1.org/v1/championship_drivers?session_key=latest` (tried first; OpenF1 may 404, then `src/services/openf1.js` resolves the latest completed Grand Prix via `sessions?year=` and calls `championship_drivers?session_key=<numeric>`)
+- `championship_drivers?session_key=<numeric>` — `session_key` is resolved in `src/services/openf1.js` via `sessions?year=` (latest completed Sunday GP). The API returns **404** for `session_key=latest`, so the app does not call that variant.
 - `https://api.openf1.org/v1/drivers?session_key=<resolved_session_key>`
 
 ## Features Implemented
@@ -66,7 +66,8 @@ Current integration uses:
 - **Default route:** `/` → **`/dashboard`** (React Router `Navigate` in `App.jsx`)
 - **Site-wide footer** (`SiteFooter.jsx`) + **Acknowledgements** page at `/acknowledgements` (OpenF1 credit, F1® disclaimer, “built with”)
 - Multi-page React app with routing:
-  - Dashboard (`/dashboard`)
+  - Dashboard (`/dashboard`) including **Latest F1 News** preview cards (GNews)
+  - **News** listing (`/news`) and **article** view (`/news/article/:key`, in-app body + “Read original” + related items)
   - Drivers standings (`/drivers`) and **per-driver profile** (`/drivers/:driverNumber`, OpenF1 `driver` + championship row)
   - Constructors (`/constructors`) and **per-team detail** (`/constructors/team/:teamSlug`, roster + points)
   - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`)
@@ -93,8 +94,11 @@ Current integration uses:
   - Workaround: used `npm.cmd` / `npx.cmd` commands.
 
 - **OpenF1 session endpoint availability**
-  - Some `championship_drivers` session keys return 404; `session_key=latest` for that endpoint can also 404.
-  - Fix: try `latest`, then resolve the latest completed Sunday race from `sessions?year=` and query `championship_drivers` + driver metadata with that numeric `session_key`.
+  - Some `championship_drivers` / `session_result` keys return **404** (wrong or unsupported `session_key`). `/meeting?meeting_key=` can **404** even for valid meetings; the app falls back to `meetings?year=`.
+  - Standings: resolve the latest completed Sunday GP from `sessions?year=` then call `championship_drivers?session_key=<numeric>` (never `latest`, which consistently 404s).
+- **OpenF1 rate limiting (429)**
+  - The API returns **429** with *“Max 3 requests/second”* for `api.openf1.org`. Burst traffic (parallel `Promise.all`, several tabs, or **React Strict Mode** doubling effects in dev) can exceed that easily.
+  - `openf1.js` now **queues every OpenF1 HTTP call** globally and enforces **~360ms minimum spacing** between request starts (under 3/sec), on top of **429 retries** (exponential backoff, optional `Retry-After`, jitter).
 
 - **Bundle size warning after adding charts**
   - Recharts increased bundle size and triggered a warning.
@@ -108,6 +112,8 @@ npm.cmd run dev
 ```
 
 Then open `http://localhost:5173` (root redirects to `/dashboard`), or use the tab Vite opens — it targets **`/dashboard`** via `vite.config.js` `server.open`.
+
+**Formula 1 news (GNews):** copy `.env.example` to `.env` and set `VITE_GNEWS_API_KEY` to your key from [gnews.io](https://gnews.io/). Restart Vite after changing env vars. The app calls GNews API v4 search (`q=Formula%201`, `lang=en`) using the **`apikey`** query parameter (per [GNews docs](https://gnews.io/docs/v4)); older examples sometimes show `token=` — use **`apikey`** with the same key value.
 
 Run tests with coverage (enforces thresholds from `jest.config.cjs`):
 
@@ -133,7 +139,7 @@ npm.cmd run test:coverage
   - [x] `sessions?meeting_key=`
   - [x] `sessions?year=` (standings fallback: latest completed Grand Prix)
   - [x] `drivers?session_key=`
-  - [x] `championship_drivers` (`session_key=latest` with `sessions?year=` fallback)
+  - [x] `championship_drivers` (numeric `session_key` from `sessions?year=`; no `latest` call)
   - [x] `championship_teams?session_key=...`
   - [x] `session_result?session_key=...`
 - [x] Hardcoded data removed from key pages and replaced by API-driven content
@@ -148,6 +154,7 @@ npm.cmd run test:coverage
 - [x] Tooltips/popups with richer driver/team details (`DriverRichSummary` / `TeamRichSummary` on standings, race results, constructors, line-ups, head-to-head, profiles)
 - [x] Bundle optimization via lazy loading/code splitting (`React.lazy` per route in `App.jsx`, `Suspense` + `PageRouteFallback`)
 - [x] Site-wide **footer** + **Acknowledgements** at `/acknowledgements` (`SiteFooter.jsx`, `Acknowledgements.jsx`, link in mobile drawer)
+- [x] **F1 news** via GNews (`src/services/gnews.js`): main nav **News** → `/news`, Dashboard previews (`max=5`), article route with related articles; env `VITE_GNEWS_API_KEY` (see `.env.example`)
 
 ### UI/Animation Enhancements (Later)
 
@@ -160,8 +167,8 @@ npm.cmd run test:coverage
 
 ### Planned
 
-- [ ] **Dashboard news:** add a **News** section on the Dashboard; each item is clickable and opens a dedicated **article page** (route + lazy page) showing the related **article body** and **media** (e.g. images, video embeds, galleries—whatever the content model supports).
-- [ ] **News in the main nav:** add a **News** item to the site navigation (toolbar / drawer) so users can open a dedicated **F1 news listing** route (`/news` or similar) without going through the Dashboard; the listing reuses the same feed as the Dashboard previews but shows the full scrollable list (filters or pagination optional).
+- [x] **Dashboard news** — **Latest F1 News** on the Dashboard (`max=5`); cards open `/news/article/:key` (lazy `NewsArticle.jsx`).
+- [x] **News in the main nav** — **News** in toolbar + drawer → `/news` (lazy `News.jsx`), same GNews feed as previews with `max=20`.
 
 #### Feature architecture (News)
 
@@ -173,16 +180,16 @@ Dashboard
    └── Latest F1 News (preview cards; subset of same feed)
 
 News listing page
-   └── All items / paginated or filtered list → article route
+   └── Card grid → article route
 
 News Article Page
-   └── Full article details
-   └── image
-   └── source link
-   └── related articles
+   └── Plain-text body (from HTML content / description)
+   └── Hero image when provided
+   └── Read original (publisher URL)
+   └── Related articles (other items from the same search)
 ```
 
-- **Navigation** — **News** link alongside existing routes; highlights when active on listing or article pages.
-- **News listing page** — dedicated route for the **full F1 news feed** (same data source as Dashboard cards); each row or card opens the article route.
-- **Dashboard** — surface **Latest F1 News** as **preview cards** (title, teaser, optional hero thumb, date); card click navigates to the article route.
-- **News Article Page** — **full article** copy, a primary **image** (or hero media), an external **source link** (attribution / “read original”), and a **related articles** block (same feed, filtered or ranked).
+- **Navigation** — **News** link; active on `/news` and `/news/article/...`.
+- **News listing page** — GNews search `Formula 1`, English; cards link to the article route.
+- **Dashboard** — preview strip + **View all** → `/news`.
+- **News Article Page** — resolves the article by URL (base64url key); refetches search (`max=100`) to fill **related** cards; GNews does not expose galleries/video embeds in this integration.

@@ -4,6 +4,7 @@ import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { Link as RouterLink } from "react-router-dom";
 
 export default function Acknowledgements() {
   return (
@@ -46,6 +47,36 @@ export default function Acknowledgements() {
             <Typography variant="body2" color="text.secondary">
               Data is provided as-is. Availability, accuracy, and rate limits are determined by the
               API operator, not this dashboard.
+            </Typography>
+          </section>
+
+          <Divider />
+
+          <section aria-labelledby="ack-gnews-heading">
+            <Typography id="ack-gnews-heading" variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+              GNews API
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+              Formula 1 news headlines on the Dashboard, the{" "}
+              <Link component={RouterLink} to="/news" underline="hover">
+                News
+              </Link>{" "}
+              page, and article views are fetched from{" "}
+              <Link
+                href="https://gnews.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+              >
+                GNews
+              </Link>{" "}
+              (search: <code>Formula 1</code>, English). This app is not affiliated with or endorsed by
+              GNews. Article text and images belong to their original publishers; use &quot;Read
+              original&quot; for the canonical story.
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              A valid API key is required (<code>VITE_GNEWS_API_KEY</code> in <code>.env</code>); rate
+              limits and availability are set by GNews.
             </Typography>
           </section>
 
