@@ -72,12 +72,15 @@ async function fetchOpenF1(path, signal) {
   throw new Error(`OpenF1: internal pacing loop exhausted for ${path}`);
 }
 
+function isOpenF1NotFoundError(err) {
+  return /\(\s*404\s*\)/.test(String(err.message ?? ""));
+}
+
 /**
- * OpenF1 returns 404 for `championship_*?session_key=latest`, so we never call it.
- * Resolve the most recent completed Sunday GP from `/sessions` and use that
- * numeric `session_key` (same key callers use from `standings[0].session_key`).
+ * Completed Sunday GPs (newest first). OpenF1 may list a session in `/sessions`
+ * before `championship_drivers` exists for it (404) — callers should try older keys.
  */
-async function resolveLatestGrandPrixSessionKeyForChampionship(signal) {
+async function listGrandPrixSessionKeysChampionshipCandidates(signal) {
   const currentYear = new Date().getUTCFullYear();
   const years = [currentYear, currentYear - 1];
   const lists = await Promise.all(
@@ -100,29 +103,57 @@ async function resolveLatestGrandPrixSessionKeyForChampionship(signal) {
   );
 
   const now = Date.now();
-  const completed = races.find((s) => {
+  const completed = races.filter((s) => {
     const t = Date.parse(s.date_end ?? s.date_start ?? "");
     return Number.isFinite(t) && t <= now;
   });
-  const pick = completed ?? races[0];
-  return pick != null ? Number(pick.session_key) : null;
+
+  const seen = new Set();
+  const ordered = [];
+  for (const s of completed) {
+    const k = Number(s.session_key);
+    if (!seen.has(k)) {
+      seen.add(k);
+      ordered.push(k);
+    }
+  }
+
+  if (ordered.length === 0 && races[0] != null) {
+    ordered.push(Number(races[0].session_key));
+  }
+
+  return ordered;
 }
 
 export async function getLatestDriverChampionship(signal) {
-  const sessionKey = await resolveLatestGrandPrixSessionKeyForChampionship(
-    signal,
-  );
-  if (sessionKey == null) {
+  const sessionKeys = await listGrandPrixSessionKeysChampionshipCandidates(signal);
+  if (sessionKeys.length === 0) {
     throw new Error(
-      "OpenF1 championship: no completed Grand Prix session found to resolve standings.",
+      "OpenF1 championship: no Grand Prix race sessions found to resolve standings.",
     );
   }
 
-  const data = await fetchOpenF1(
-    `/championship_drivers?session_key=${sessionKey}`,
-    signal,
+  let lastErr = null;
+  for (const sessionKey of sessionKeys) {
+    try {
+      const data = await fetchOpenF1(
+        `/championship_drivers?session_key=${sessionKey}`,
+        signal,
+      );
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      if (err.name === "AbortError") throw err;
+      if (isOpenF1NotFoundError(err)) {
+        lastErr = err;
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw new Error(
+    `OpenF1 championship: no driver standings for recent sessions (${sessionKeys.length} tried). Last error: ${lastErr?.message ?? "unknown"}`,
   );
-  return Array.isArray(data) ? data : [];
 }
 
 export async function getDriversBySession(sessionKey, signal) {

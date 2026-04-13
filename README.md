@@ -95,7 +95,7 @@ Current integration uses:
 
 - **OpenF1 session endpoint availability**
   - Some `championship_drivers` / `session_result` keys return **404** (wrong or unsupported `session_key`). `/meeting?meeting_key=` can **404** even for valid meetings; the app falls back to `meetings?year=`.
-  - Standings: resolve the latest completed Sunday GP from `sessions?year=` then call `championship_drivers?session_key=<numeric>` (never `latest`, which consistently 404s).
+  - Standings: resolve completed Sunday GPs from `sessions?year=` (newest first), call `championship_drivers?session_key=<numeric>`, and **skip 404s** (OpenF1 often has no championship row yet for the latest race, e.g. while data is ingested) until an older session returns data.
 - **OpenF1 rate limiting (429)**
   - The API returns **429** with *“Max 3 requests/second”* for `api.openf1.org`. Burst traffic (parallel `Promise.all`, several tabs, or **React Strict Mode** doubling effects in dev) can exceed that easily.
   - `openf1.js` now **queues every OpenF1 HTTP call** globally and enforces **~360ms minimum spacing** between request starts (under 3/sec), on top of **429 retries** (exponential backoff, optional `Retry-After`, jitter).
@@ -113,7 +113,7 @@ npm.cmd run dev
 
 Then open `http://localhost:5173` (root redirects to `/dashboard`), or use the tab Vite opens — it targets **`/dashboard`** via `vite.config.js` `server.open`.
 
-**Formula 1 news (GNews):** copy `.env.example` to `.env` and set `VITE_GNEWS_API_KEY` to your key from [gnews.io](https://gnews.io/). Restart Vite after changing env vars. The app calls GNews API v4 search (`q=Formula%201`, `lang=en`) using the **`apikey`** query parameter (per [GNews docs](https://gnews.io/docs/v4)); older examples sometimes show `token=` — use **`apikey`** with the same key value.
+**Formula 1 news (GNews):** copy `.env.example` to `.env` and set `VITE_GNEWS_API_KEY` to your key from [gnews.io](https://gnews.io/). Restart Vite after changing env vars. The app calls GNews API v4 search (`q=Formula%201`, `lang=en`) using the **`apikey`** query parameter (per [GNews docs](https://gnews.io/docs/v4)); older examples sometimes show `token=` — use **`apikey`** with the same key value. **`src/services/gnews.js`** queues requests (~1 request/second spacing) and **retries HTTP 429** with backoff, because GNews blocks bursts (“too many requests in a short period”).
 
 Run tests with coverage (enforces thresholds from `jest.config.cjs`):
 

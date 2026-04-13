@@ -61,4 +61,31 @@ describe("gnews service", () => {
 
     await expect(searchFormulaOneNews({ max: 3 })).rejects.toThrow(/GNews request failed \(401\)/);
   });
+
+  it(
+    "retries on 429 then succeeds",
+    async () => {
+      jest.spyOn(Math, "random").mockReturnValue(0);
+      fetch
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 429,
+          text: async () => "{}",
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            articles: [
+              { title: "After rate limit", url: "https://u.test/r", description: "", content: "" },
+            ],
+          }),
+        });
+
+      await expect(searchFormulaOneNews({ max: 5 })).resolves.toEqual([
+        expect.objectContaining({ title: "After rate limit", url: "https://u.test/r" }),
+      ]);
+      expect(fetch).toHaveBeenCalledTimes(2);
+    },
+    15000,
+  );
 });

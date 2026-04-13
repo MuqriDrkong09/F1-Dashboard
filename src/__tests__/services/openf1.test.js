@@ -142,6 +142,59 @@ describe("openf1 service", () => {
     });
   });
 
+  it("getLatestDriverChampionship skips sessions where championship_drivers returns 404", async () => {
+    fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes("/sessions?year=2026")) {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (u.includes("/sessions?year=2025")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [
+            {
+              session_key: 200,
+              session_type: "Race",
+              session_name: "Race",
+              date_start: "2025-12-07T13:00:00+00:00",
+              date_end: "2025-12-07T15:00:00+00:00",
+            },
+            {
+              session_key: 199,
+              session_type: "Race",
+              session_name: "Race",
+              date_start: "2025-11-23T13:00:00+00:00",
+              date_end: "2025-11-23T15:00:00+00:00",
+            },
+          ],
+        });
+      }
+      if (u.includes("championship_drivers?session_key=200")) {
+        return Promise.resolve({
+          ok: false,
+          status: 404,
+          headers: { get: () => null },
+        });
+      }
+      if (u.includes("championship_drivers?session_key=199")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [{ session_key: 199, position: 2 }],
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
+
+    const ySpy = jest.spyOn(Date.prototype, "getUTCFullYear").mockReturnValue(2026);
+    try {
+      await expect(getLatestDriverChampionship()).resolves.toEqual([
+        { session_key: 199, position: 2 },
+      ]);
+    } finally {
+      ySpy.mockRestore();
+    }
+  });
+
   it("getLatestDriverChampionship resolves session from /sessions then loads standings", async () => {
     fetch.mockImplementation((url) => {
       const u = String(url);
