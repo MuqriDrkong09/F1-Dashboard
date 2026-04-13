@@ -70,13 +70,15 @@ export default function Acknowledgements() {
               >
                 GNews
               </Link>{" "}
-              (search: <code>Formula 1</code>, English). This app is not affiliated with or endorsed by
-              GNews. Article text and images belong to their original publishers; use &quot;Read
-              original&quot; for the canonical story.
+              (search: <code>Formula 1</code>, English). The browser reads news from this app&apos;s
+              <code> /api/gnews-search </code> route (server-side proxy), not directly from
+              <code> gnews.io</code>. This app is not affiliated with or endorsed by GNews. Article
+              text and images belong to their original publishers; use &quot;Open in new tab&quot; for the
+              canonical story.
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              A valid API key is required (<code>VITE_GNEWS_API_KEY</code> in <code>.env</code>); rate
-              limits and availability are set by GNews.
+              A valid API key is required (<code>VITE_GNEWS_API_KEY</code> in <code>.env</code> and
+              Vercel project env vars); rate limits and availability are set by GNews.
             </Typography>
           </section>
 

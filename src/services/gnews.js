@@ -1,4 +1,5 @@
-const GNEWS_SEARCH = "https://gnews.io/api/v4/search";
+/** Same-origin proxy endpoint (Vercel serverless / Vite dev middleware). */
+const GNEWS_SEARCH_PROXY = "/api/gnews-search";
 
 /** GNews blocks bursts; space requests and retry 429 with backoff. */
 const GNEWS_MIN_GAP_MS = 1000;
@@ -79,9 +80,14 @@ async function fetchGNewsSearch(url, signal) {
   throw new Error("GNews: rate limited after retries");
 }
 
-function getGnewsApiKey() {
-  const k = process.env.VITE_GNEWS_API_KEY;
-  return typeof k === "string" ? k.trim() : "";
+function buildGnewsSearchProxyUrl(max) {
+  const n = Math.min(100, Math.max(1, Math.floor(Number(max)) || 10));
+  const params = new URLSearchParams({
+    q: "Formula 1",
+    lang: "en",
+    max: String(n),
+  });
+  return `${GNEWS_SEARCH_PROXY}?${params.toString()}`;
 }
 
 /** @param {unknown} raw */
@@ -104,28 +110,13 @@ export function normalizeGNewsArticle(raw) {
 
 /**
  * Formula 1 articles via GNews search (`q=Formula 1`, `lang=en`).
- * Uses the `apikey` query parameter per GNews API v4 docs.
+ * Uses same-origin `/api/gnews-search` so browser avoids CORS to `gnews.io`.
  *
  * @param {{ max?: number; signal?: AbortSignal }} [options]
  */
 export async function searchFormulaOneNews(options = {}) {
   const { max = 10, signal } = options;
-  const apiKey = getGnewsApiKey();
-  if (!apiKey) {
-    throw new Error(
-      "GNews API key missing. Add VITE_GNEWS_API_KEY to a .env file in the project root (see .env.example).",
-    );
-  }
-
-  const n = Math.min(100, Math.max(1, Math.floor(Number(max)) || 10));
-  const params = new URLSearchParams({
-    q: "Formula 1",
-    lang: "en",
-    max: String(n),
-    apikey: apiKey,
-  });
-
-  const url = `${GNEWS_SEARCH}?${params.toString()}`;
+  const url = buildGnewsSearchProxyUrl(max);
   const json = await fetchGNewsSearch(url, signal);
   const list = Array.isArray(json.articles) ? json.articles : [];
   return list.map(normalizeGNewsArticle).filter(Boolean);

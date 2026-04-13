@@ -113,7 +113,7 @@ npm.cmd run dev
 
 Then open `http://localhost:5173` (root redirects to `/dashboard`), or use the tab Vite opens — it targets **`/dashboard`** via `vite.config.js` `server.open`.
 
-**Formula 1 news (GNews):** copy `.env.example` to `.env` and set `VITE_GNEWS_API_KEY` to your key from [gnews.io](https://gnews.io/). Restart Vite after changing env vars. The app calls GNews API v4 search (`q=Formula%201`, `lang=en`) using the **`apikey`** query parameter (per [GNews docs](https://gnews.io/docs/v4)); older examples sometimes show `token=` — use **`apikey`** with the same key value. **`src/services/gnews.js`** queues requests (~1 request/second spacing) and **retries HTTP 429** with backoff, because GNews blocks bursts (“too many requests in a short period”).
+**Formula 1 news (GNews):** copy `.env.example` to `.env` and set `VITE_GNEWS_API_KEY` to your key from [gnews.io](https://gnews.io/). The browser calls same-origin **`/api/gnews-search`**; on Vercel this is handled by `api/gnews-search.js` (server-side), and in local dev by middleware in `vite.config.js`. This avoids browser CORS failures to `gnews.io`, keeps the key out of query strings in client requests, and still applies request pacing/retry in `src/services/gnews.js`.
 
 Run tests with coverage (enforces thresholds from `jest.config.cjs`):
 

@@ -42,14 +42,14 @@ describe("gnews service", () => {
     expect(out).toHaveLength(1);
     expect(out[0].title).toBe("A");
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("https://gnews.io/api/v4/search?"),
+      expect.stringContaining("/api/gnews-search?"),
       expect.any(Object),
     );
     const u = String(fetch.mock.calls[0][0]);
-    expect(u).toContain("q=Formula+1");
+    expect(u).toMatch(/q=Formula(\+|%20)1/);
     expect(u).toContain("lang=en");
     expect(u).toContain("max=5");
-    expect(u).toContain("apikey=");
+    expect(u).not.toContain("apikey=");
   });
 
   it("throws on non-ok response", async () => {
