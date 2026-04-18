@@ -31,6 +31,7 @@ import { useThemeMode } from "./context/AppThemeProvider";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const News = lazy(() => import("./pages/News"));
 const NewsArticle = lazy(() => import("./pages/NewsArticle"));
+const Media = lazy(() => import("./pages/Media"));
 const Drivers = lazy(() => import("./pages/Drivers"));
 const Constructors = lazy(() => import("./pages/Constructors"));
 const Races = lazy(() => import("./pages/Races"));
@@ -255,6 +256,34 @@ export default function App() {
                 News
               </Button>
 
+              <Button
+                component={NavLink}
+                to="/media"
+                end={true}
+                size="small"
+                sx={{
+                  ...navBarUnderline,
+                  color: "text.secondary",
+                  whiteSpace: "nowrap",
+                  px: 1.25,
+                  py: 0.5,
+                  "&::after": {
+                    ...navBarUnderline["&::after"],
+                    bgcolor: "primary.light",
+                  },
+                  "&.active": {
+                    color: "common.white",
+                    bgcolor: "primary.main",
+                  },
+                  "&.active::after": {
+                    ...navBarUnderline["&.active::after"],
+                    bgcolor: alpha("#ffffff", 0.9),
+                  },
+                }}
+              >
+                Media
+              </Button>
+
               {navGroups.map((group) => {
                 const active = groupIsActive(group, location.pathname);
                 return (
@@ -427,6 +456,34 @@ export default function App() {
           >
             News
           </Button>
+          <Button
+            component={NavLink}
+            to="/media"
+            end
+            onClick={() => setIsMenuOpen(false)}
+            sx={{
+              justifyContent: "flex-start",
+              color: "text.primary",
+              py: 1,
+              borderLeft: 3,
+              borderLeftStyle: "solid",
+              borderLeftColor: "transparent",
+              borderRadius: 0,
+              pl: 2,
+              transition: "border-color 0.28s ease, padding-left 0.28s ease",
+              "&.active": {
+                color: "primary.main",
+                fontWeight: 700,
+                borderLeftColor: "primary.main",
+                pl: 1.75,
+              },
+              "@media (prefers-reduced-motion: reduce)": {
+                transition: "none",
+              },
+            }}
+          >
+            Media
+          </Button>
           <Divider sx={{ my: 1 }} />
           {navGroups.map((group) => (
             <Box key={group.id} sx={{ mb: 1.5 }}>
@@ -536,6 +593,7 @@ export default function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/news/article/:articleKey" element={<NewsArticle />} />
               <Route path="/news" element={<News />} />
+              <Route path="/media" element={<Media />} />
               <Route path="/drivers/:driverNumber" element={<DriverDetail />} />
               <Route path="/drivers" element={<Drivers />} />
               <Route path="/constructors/team/:teamSlug" element={<ConstructorDetail />} />

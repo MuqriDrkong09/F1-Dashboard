@@ -68,6 +68,7 @@ Current integration uses:
 - Multi-page React app with routing:
   - Dashboard (`/dashboard`) including **Latest F1 News** preview cards (GNews)
   - **News** listing (`/news`) and **article** view (`/news/article/:key`, in-app body + “Read original” + related items)
+  - **Media** hub (`/media`): official F1 video hub, YouTube, F1 TV, Instagram, and X (external links)
   - Drivers standings (`/drivers`) and **per-driver profile** (`/drivers/:driverNumber`, OpenF1 `driver` + championship row)
   - Constructors (`/constructors`) and **per-team detail** (`/constructors/team/:teamSlug`, roster + points)
   - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`)
