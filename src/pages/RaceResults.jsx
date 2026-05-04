@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -13,6 +14,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
+import Button from "@mui/material/Button";
 import { alpha } from "@mui/material/styles";
 import DriverRichSummary, { richTooltipSlotProps } from "../components/DriverRichSummary";
 import TeamRichSummary from "../components/TeamRichSummary";
@@ -130,6 +132,7 @@ function PodiumSlot({ position, entry }) {
 
 export default function RaceResults() {
   const [results, setResults] = useState([]);
+  const [sessionMeta, setSessionMeta] = useState({ sessionKey: null, meetingKey: null });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -143,10 +146,16 @@ export default function RaceResults() {
 
         const standings = await getLatestDriverChampionship(controller.signal);
         const sessionKey = standings[0]?.session_key;
+        const meetingKey = standings[0]?.meeting_key;
 
         if (!sessionKey) {
           throw new Error("Could not resolve session key for race results");
         }
+
+        setSessionMeta({
+          sessionKey: Number(sessionKey),
+          meetingKey: Number.isFinite(Number(meetingKey)) ? Number(meetingKey) : null,
+        });
 
         const [sessionResults, drivers] = await Promise.all([
           getSessionResults(sessionKey, controller.signal),
@@ -222,9 +231,22 @@ export default function RaceResults() {
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
           Race Results
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
           Latest race classification from OpenF1 `session_result`.
         </Typography>
+
+        {!isLoading && !error && sessionMeta.sessionKey != null && sessionMeta.meetingKey != null && (
+          <Box sx={{ mb: 3 }}>
+            <Button
+              component={RouterLink}
+              to={`/races/${sessionMeta.meetingKey}/session/${sessionMeta.sessionKey}/laps`}
+              variant="outlined"
+              size="small"
+            >
+              Lap times for this race
+            </Button>
+          </Box>
+        )}
 
         {isLoading ? (
           <RaceResultsSkeleton />

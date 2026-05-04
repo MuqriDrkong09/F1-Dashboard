@@ -108,6 +108,7 @@ export default function RaceMeetingSessions() {
                   <TableCell>Session</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell align="right">Start (local)</TableCell>
+                  <TableCell align="right">Lap data</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -122,6 +123,19 @@ export default function RaceMeetingSessions() {
                     <TableCell>{session.session_type ?? "—"}</TableCell>
                     <TableCell align="right">
                       {formatSessionStart(session.date_start)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {Number.isFinite(Number(session.session_key)) ? (
+                        <Link
+                          component={RouterLink}
+                          to={`/races/${meetingKeyNum}/session/${session.session_key}/laps`}
+                          underline="hover"
+                        >
+                          View laps
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

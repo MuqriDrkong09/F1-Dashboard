@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import RaceResults from "../../pages/RaceResults";
 import {
   getDriversBySession,
@@ -18,7 +19,9 @@ describe("RaceResults page", () => {
   });
 
   it("renders podium and classification table", async () => {
-    getLatestDriverChampionship.mockResolvedValue([{ session_key: 42 }]);
+    getLatestDriverChampionship.mockResolvedValue([
+      { session_key: 42, meeting_key: 99 },
+    ]);
     getSessionResults.mockResolvedValue([
       {
         driver_number: 7,
@@ -40,7 +43,11 @@ describe("RaceResults page", () => {
       { driver_number: 44, full_name: "Driver Two", team_name: "Team B" },
     ]);
 
-    render(<RaceResults />);
+    render(
+      <MemoryRouter>
+        <RaceResults />
+      </MemoryRouter>,
+    );
 
     await waitFor(() => expect(screen.getByText("Podium")).toBeInTheDocument());
     expect(screen.getByLabelText("P1, Driver One")).toBeInTheDocument();
@@ -51,12 +58,20 @@ describe("RaceResults page", () => {
     expect(screen.getByText("3rd")).toBeInTheDocument();
     expect(screen.getAllByText("Driver One").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Leader")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /lap times for this race/i })).toHaveAttribute(
+      "href",
+      "/races/99/session/42/laps",
+    );
   });
 
   it("renders error when session key cannot be resolved", async () => {
     getLatestDriverChampionship.mockResolvedValue([]);
 
-    render(<RaceResults />);
+    render(
+      <MemoryRouter>
+        <RaceResults />
+      </MemoryRouter>,
+    );
 
     await waitFor(() =>
       expect(

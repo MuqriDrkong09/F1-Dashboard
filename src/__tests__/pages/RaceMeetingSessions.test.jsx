@@ -43,6 +43,10 @@ describe("RaceMeetingSessions page", () => {
     await waitFor(() => expect(screen.getByText("Practice 1")).toBeInTheDocument());
     expect(screen.getByText("Test GP")).toBeInTheDocument();
     expect(screen.getByText("Practice")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /view laps/i })).toHaveAttribute(
+      "href",
+      "/races/42/session/101/laps",
+    );
   });
 
   it("shows error for invalid meeting key", async () => {

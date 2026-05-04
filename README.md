@@ -45,7 +45,17 @@ Use this endpoint to build race result pages and session classification tables.
 
 Returned fields include position, driver, laps, session time/gap values, and result metadata.
 
-### 4) Championship Standings
+### 4) Lap timing
+
+Per-lap sector splits, duration, intermediate speeds, speed trap, pit-out flag, and mini-sector payloads (see OpenF1 docs).
+
+| Endpoint | Description | Example URL |
+| --- | --- | --- |
+| `laps` | Lap rows for a session (`session_key` required); optional filters e.g. `driver_number`, `lap_number` | `https://api.openf1.org/v1/laps?session_key=9161` |
+
+The app loads all laps for the selected session once (`getLapsBySession` in `src/services/openf1.js`) and filters by driver in the UI (`SessionLaps.jsx`).
+
+### 5) Championship Standings
 
 Use these endpoints for cumulative points, rankings, and standings charts/tables.
 
@@ -61,6 +71,38 @@ Current integration uses:
 - `championship_drivers?session_key=<numeric>` — `session_key` is resolved in `src/services/openf1.js` via `sessions?year=` (latest completed Sunday GP). The API returns **404** for `session_key=latest`, so the app does not call that variant.
 - `https://api.openf1.org/v1/drivers?session_key=<resolved_session_key>`
 
+### OpenF1 endpoints not integrated yet
+
+These resources exist in the [OpenF1 API docs](https://openf1.org/docs#api-endpoints) but are **not** called from `src/services/openf1.js` (or elsewhere under `src/`) today:
+
+1. **`car_data`** — High-frequency telemetry (speed, throttle, brake, gear, RPM, DRS, etc.).
+2. **`location`** — On-track position traces (maps / circuit visualization).
+3. **`intervals`** — Gaps to leader / live-style intervals during races.
+4. **`position`** — Running order over time.
+5. **`pit`** — Pit lane timing, stop duration, tyre compound when exposed.
+6. **`stints`** — Tyre stint summaries and stint metrics.
+7. **`starting_grid`** — Grid positions before the race.
+8. **`race_control`** — Flags, safety car, race-control messages.
+9. **`weather`** — Air/track temperature, wind, rain, humidity, etc.
+10. **`team_radio`** — Team radio clip metadata (URLs); playback/embed UX is separate.
+11. **`overtakes`** — Overtake events when available for a session.
+
+**Integrated elsewhere:** **`laps`** — Session lap browser at **`/races/:meetingKey/session/:sessionKey/laps`** (`SessionLaps.jsx`), linked from **Race Results** and each row on **`/races/:meetingKey`** (sessions table).
+
+**Also unused:** CSV responses (`csv=true` on requests); the app uses JSON only. **`session_key=latest`** / **`meeting_key=latest`** are avoided in favor of resolving numeric keys (see above).
+
+**Suggested priority for this project** (calendar, standings, results — mostly historical data, same OpenF1 rate limits):
+
+| Tier | Endpoints | Why |
+| --- | --- | --- |
+| Highest impact | **`starting_grid`**, **`pit`** + **`stints`** | Grid vs result, strategy narrative; **`laps`** is now in-app (see above). |
+| Strong second | **`race_control`**, **`weather`** | Session timeline and context for pace and tyres. |
+| Heavier / niche | **`intervals`**, **`position`** | Best for live or replay race views; more polling and UX cost. |
+| High effort / polish | **`car_data`**, **`location`** | Large payloads; maps and charts need caching/downsampling. |
+| Optional | **`team_radio`**, **`overtakes`** | Fun when data exists; radio needs audio/embed handling; overtakes vary by session. |
+
+OpenF1 may distinguish **historical** vs **live** access in their terms; check current docs before building always-on live features.
+
 ## Features Implemented
 
 - **Default route:** `/` → **`/dashboard`** (React Router `Navigate` in `App.jsx`)
@@ -71,7 +113,7 @@ Current integration uses:
   - **Media** hub (`/media`): official F1 video hub, YouTube, F1 TV, Instagram, and X (external links)
   - Drivers standings (`/drivers`) and **per-driver profile** (`/drivers/:driverNumber`, OpenF1 `driver` + championship row)
   - Constructors (`/constructors`) and **per-team detail** (`/constructors/team/:teamSlug`, roster + points)
-  - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`)
+  - Races (calendar + per-meeting **sessions** at `/races/:meetingKey`, **View laps** → `/races/:meetingKey/session/:sessionKey/laps`)
   - Line-ups (`/team-drivers`: teams + drivers for latest session)
 - MUI-based responsive UI and components
 - Driver standings fetched from live API data
@@ -143,6 +185,7 @@ npm.cmd run test:coverage
   - [x] `championship_drivers` (numeric `session_key` from `sessions?year=`; no `latest` call)
   - [x] `championship_teams?session_key=...`
   - [x] `session_result?session_key=...`
+  - [x] `laps?session_key=...` (lap times page + `getLapsBySession` in `openf1.js`)
 - [x] Hardcoded data removed from key pages and replaced by API-driven content
 - [x] Loading and error states added on API-backed pages
 - [x] Jest testing setup completed and test suites passing

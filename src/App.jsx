@@ -42,6 +42,7 @@ const DriverProfiles = lazy(() => import("./pages/DriverProfiles"));
 const DriverDetail = lazy(() => import("./pages/DriverDetail"));
 const ConstructorDetail = lazy(() => import("./pages/ConstructorDetail"));
 const RaceResults = lazy(() => import("./pages/RaceResults"));
+const SessionLaps = lazy(() => import("./pages/SessionLaps"));
 const HeadToHeadComparison = lazy(() => import("./pages/HeadToHeadComparison"));
 const Acknowledgements = lazy(() => import("./pages/Acknowledgements"));
 
@@ -599,6 +600,10 @@ export default function App() {
               <Route path="/constructors/team/:teamSlug" element={<ConstructorDetail />} />
               <Route path="/constructors" element={<Constructors />} />
               <Route path="/races/:meetingKey" element={<RaceMeetingSessions />} />
+              <Route
+                path="/races/:meetingKey/session/:sessionKey/laps"
+                element={<SessionLaps />}
+              />
               <Route path="/races" element={<Races />} />
               <Route path="/team-drivers" element={<TeamDriverMapping />} />
               <Route path="/countdown" element={<CountdownTimer />} />

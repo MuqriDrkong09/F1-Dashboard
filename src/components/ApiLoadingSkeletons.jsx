@@ -137,6 +137,7 @@ export function MeetingSessionsTableSkeleton() {
               <TableCell>Session</TableCell>
               <TableCell>Type</TableCell>
               <TableCell align="right">Start (local)</TableCell>
+              <TableCell align="right">Lap data</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -150,6 +151,9 @@ export function MeetingSessionsTableSkeleton() {
                 </TableCell>
                 <TableCell align="right">
                   <Skeleton sx={wave({ ml: "auto" })} width={140} />
+                </TableCell>
+                <TableCell align="right">
+                  <Skeleton sx={wave({ ml: "auto" })} width={72} />
                 </TableCell>
               </TableRow>
             ))}
@@ -204,6 +208,46 @@ export function DriverProfilesSkeleton() {
           </Grid>
         ))}
       </Grid>
+    </LoadingStateRegion>
+  );
+}
+
+export function SessionLapsSkeleton() {
+  return (
+    <LoadingStateRegion label="Loading lap times">
+      <Stack spacing={2}>
+        <Skeleton sx={wave()} width={280} height={40} variant="rounded" />
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Lap</TableCell>
+                <TableCell align="right">S1</TableCell>
+                <TableCell align="right">S2</TableCell>
+                <TableCell align="right">S3</TableCell>
+                <TableCell align="right">Time</TableCell>
+                <TableCell align="right">I1</TableCell>
+                <TableCell align="right">I2</TableCell>
+                <TableCell align="right">ST</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Array.from({ length: 12 }, (_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton sx={wave()} width={28} />
+                  </TableCell>
+                  {[1, 2, 3, 4, 5, 6, 7].map((j) => (
+                    <TableCell key={j} align="right">
+                      <Skeleton sx={wave({ ml: "auto" })} width={52} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Stack>
     </LoadingStateRegion>
   );
 }

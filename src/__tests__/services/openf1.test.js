@@ -1,6 +1,7 @@
 import {
   getDriversBySession,
   getLatestDriverChampionship,
+  getLapsBySession,
   getMeetingByKey,
   getMeetingsByYear,
   getSessionResults,
@@ -311,5 +312,20 @@ describe("openf1 service", () => {
     await expect(getDriversBySession(123)).resolves.toEqual([]);
     await expect(getSessionResults(123)).resolves.toEqual([]);
     await expect(getTeamChampionshipBySession(123)).resolves.toEqual([]);
+    await expect(getLapsBySession(123)).resolves.toEqual([]);
+  });
+
+  it("fetches laps by session_key", async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ lap_number: 1, driver_number: 1 }],
+    });
+
+    const result = await getLapsBySession(9161);
+    expect(result).toEqual([{ lap_number: 1, driver_number: 1 }]);
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.openf1.org/v1/laps?session_key=9161",
+      { signal: undefined },
+    );
   });
 });

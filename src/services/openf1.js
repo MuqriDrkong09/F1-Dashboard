@@ -269,3 +269,13 @@ export async function getSessionsByMeeting(meetingKey, signal) {
 
   return Array.isArray(data) ? data : [];
 }
+
+/**
+ * All lap rows for a session (sector times, speeds, mini-sector segments).
+ * Payload can be large; callers typically filter by `driver_number` in memory.
+ */
+export async function getLapsBySession(sessionKey, signal) {
+  const data = await fetchOpenF1(`/laps?session_key=${sessionKey}`, signal);
+
+  return Array.isArray(data) ? data : [];
+}
