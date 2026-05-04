@@ -1,12 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import TeamDriverMapping from "../../pages/TeamDriverMapping";
 import {
+  getChampionshipDriversBySession,
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../../services/openf1";
 
 jest.mock("../../services/openf1", () => ({
+  getChampionshipDriversBySession: jest.fn(),
   getDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
   getTeamChampionshipBySession: jest.fn(),
@@ -15,6 +17,7 @@ jest.mock("../../services/openf1", () => ({
 describe("TeamDriverMapping page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getChampionshipDriversBySession.mockResolvedValue([]);
   });
 
   it("maps drivers under championship teams", async () => {

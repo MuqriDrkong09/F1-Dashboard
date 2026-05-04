@@ -17,10 +17,12 @@ import Tooltip from "@mui/material/Tooltip";
 import DriverRichSummary, { richTooltipSlotProps } from "../components/DriverRichSummary";
 import TeamRichSummary from "../components/TeamRichSummary";
 import {
+  getChampionshipDriversBySession,
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../services/openf1";
+import { mergeConstructorStandings } from "../utils/mergeConstructorStandings";
 
 function normTeam(name) {
   return String(name ?? "")
@@ -47,12 +49,19 @@ export default function TeamDriverMapping() {
           throw new Error("Could not resolve latest session for team mapping");
         }
 
-        const [driversRaw, teamsRaw] = await Promise.all([
+        const [driversRaw, teamsRaw, driverChampionship] = await Promise.all([
           getDriversBySession(sessionKey, controller.signal),
           getTeamChampionshipBySession(sessionKey, controller.signal),
+          getChampionshipDriversBySession(sessionKey, controller.signal),
         ]);
 
-        const teamsSorted = [...teamsRaw].sort(
+        const mergedTeams = mergeConstructorStandings(
+          teamsRaw,
+          driversRaw,
+          driverChampionship,
+        );
+
+        const teamsSorted = [...mergedTeams].sort(
           (a, b) =>
             Number(a.position_current ?? 999) - Number(b.position_current ?? 999),
         );

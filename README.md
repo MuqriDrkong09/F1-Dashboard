@@ -143,6 +143,9 @@ OpenF1 may distinguish **historical** vs **live** access in their terms; check c
   - The API returns **429** with *“Max 3 requests/second”* for `api.openf1.org`. Burst traffic (parallel `Promise.all`, several tabs, or **React Strict Mode** doubling effects in dev) can exceed that easily.
   - `openf1.js` now **queues every OpenF1 HTTP call** globally and enforces **~360ms minimum spacing** between request starts (under 3/sec), on top of **429 retries** (exponential backoff, optional `Retry-After`, jitter).
 
+- **`championship_teams` missing `team_name`**
+  - On some recent sessions, OpenF1 returns constructor rows with **`team_name: null`** (points may still be present). The constructors views merge **`championship_teams`** with **`drivers`** + **`championship_drivers`** so team labels and totals stay usable (`mergeConstructorStandings.js`, `getChampionshipDriversBySession` in `openf1.js`).
+
 - **Bundle size warning after adding charts**
   - Recharts increased bundle size and triggered a warning.
   - Application still builds successfully; future optimization can include lazy-loading chart routes/components.

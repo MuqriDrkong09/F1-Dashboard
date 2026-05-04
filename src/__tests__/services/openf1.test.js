@@ -1,4 +1,5 @@
 import {
+  getChampionshipDriversBySession,
   getDriversBySession,
   getLatestDriverChampionship,
   getLapsBySession,
@@ -313,6 +314,7 @@ describe("openf1 service", () => {
     await expect(getSessionResults(123)).resolves.toEqual([]);
     await expect(getTeamChampionshipBySession(123)).resolves.toEqual([]);
     await expect(getLapsBySession(123)).resolves.toEqual([]);
+    await expect(getChampionshipDriversBySession(123)).resolves.toEqual([]);
   });
 
   it("fetches laps by session_key", async () => {
@@ -325,6 +327,21 @@ describe("openf1 service", () => {
     expect(result).toEqual([{ lap_number: 1, driver_number: 1 }]);
     expect(fetch).toHaveBeenCalledWith(
       "https://api.openf1.org/v1/laps?session_key=9161",
+      { signal: undefined },
+    );
+  });
+
+  it("fetches championship_drivers by session_key", async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [{ driver_number: 1, points_current: 100 }],
+    });
+
+    await expect(getChampionshipDriversBySession(11280)).resolves.toEqual([
+      { driver_number: 1, points_current: 100 },
+    ]);
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.openf1.org/v1/championship_drivers?session_key=11280",
       { signal: undefined },
     );
   });

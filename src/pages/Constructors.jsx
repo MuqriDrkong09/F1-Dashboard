@@ -13,10 +13,12 @@ import Tooltip from "@mui/material/Tooltip";
 import { richTooltipSlotProps } from "../components/DriverRichSummary";
 import TeamRichSummary from "../components/TeamRichSummary";
 import {
+  getChampionshipDriversBySession,
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../services/openf1";
+import { mergeConstructorStandings } from "../utils/mergeConstructorStandings";
 
 const TEAM_COLORS = ["primary", "error", "warning", "info", "success"];
 
@@ -39,22 +41,29 @@ export default function Constructors() {
         setIsLoading(true);
         setError(null);
 
-        const driverChampionship = await getLatestDriverChampionship(
+        const latestStandings = await getLatestDriverChampionship(
           controller.signal,
         );
 
-        const sessionKey = driverChampionship[0]?.session_key;
+        const sessionKey = latestStandings[0]?.session_key;
 
         if (!sessionKey) {
           throw new Error("Could not resolve latest race session");
         }
 
-        const [teamStandings, driversRaw] = await Promise.all([
+        const [teamStandings, driversRaw, driverChampRows] = await Promise.all([
           getTeamChampionshipBySession(sessionKey, controller.signal),
           getDriversBySession(sessionKey, controller.signal),
+          getChampionshipDriversBySession(sessionKey, controller.signal),
         ]);
 
         const driversList = Array.isArray(driversRaw) ? driversRaw : [];
+
+        const mergedTeams = mergeConstructorStandings(
+          teamStandings,
+          driversList,
+          driverChampRows,
+        );
 
         const rosterByTeam = new Map();
         for (const d of driversList) {
@@ -70,7 +79,7 @@ export default function Constructors() {
           list.sort((a, b) => Number(a.number) - Number(b.number));
         }
 
-        const mapped = teamStandings
+        const mapped = mergedTeams
           .sort(
             (a, b) =>
               Number(a.position_current ?? 999) -

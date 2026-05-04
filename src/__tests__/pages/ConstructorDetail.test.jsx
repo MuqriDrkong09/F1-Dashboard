@@ -2,12 +2,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import ConstructorDetail from "../../pages/ConstructorDetail";
 import {
+  getChampionshipDriversBySession,
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../../services/openf1";
 
 jest.mock("../../services/openf1", () => ({
+  getChampionshipDriversBySession: jest.fn(),
   getLatestDriverChampionship: jest.fn(),
   getTeamChampionshipBySession: jest.fn(),
   getDriversBySession: jest.fn(),
@@ -27,6 +29,7 @@ function renderTeam(name) {
 describe("ConstructorDetail page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getChampionshipDriversBySession.mockResolvedValue([]);
   });
 
   it("shows team summary and roster links", async () => {

@@ -279,3 +279,13 @@ export async function getLapsBySession(sessionKey, signal) {
 
   return Array.isArray(data) ? data : [];
 }
+
+/** Driver championship rows for a session (points per driver_number). */
+export async function getChampionshipDriversBySession(sessionKey, signal) {
+  const data = await fetchOpenF1(
+    `/championship_drivers?session_key=${sessionKey}`,
+    signal,
+  );
+
+  return Array.isArray(data) ? data : [];
+}

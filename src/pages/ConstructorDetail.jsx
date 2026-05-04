@@ -19,10 +19,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import {
+  getChampionshipDriversBySession,
   getDriversBySession,
   getLatestDriverChampionship,
   getTeamChampionshipBySession,
 } from "../services/openf1";
+import { mergeConstructorStandings } from "../utils/mergeConstructorStandings";
 
 function normTeam(name) {
   return String(name ?? "")
@@ -67,10 +69,10 @@ export default function ConstructorDetail() {
           throw new Error("Missing team in URL");
         }
 
-        const driverChampionship = await getLatestDriverChampionship(
+        const latestStandings = await getLatestDriverChampionship(
           controller.signal,
         );
-        const sk = driverChampionship[0]?.session_key;
+        const sk = latestStandings[0]?.session_key;
 
         if (!sk) {
           throw new Error("Could not resolve latest race session");
@@ -78,16 +80,21 @@ export default function ConstructorDetail() {
 
         setSessionKey(sk);
 
-        const [teamStandings, driversRaw] = await Promise.all([
+        const [teamStandings, driversRaw, driverChampRows] = await Promise.all([
           getTeamChampionshipBySession(sk, controller.signal),
           getDriversBySession(sk, controller.signal),
+          getChampionshipDriversBySession(sk, controller.signal),
         ]);
 
         const driversList = Array.isArray(driversRaw) ? driversRaw : [];
 
-        const match = teamStandings.find(
-          (t) => normTeam(t.team_name) === teamKey,
+        const mergedTeams = mergeConstructorStandings(
+          teamStandings,
+          driversList,
+          driverChampRows,
         );
+
+        const match = mergedTeams.find((t) => normTeam(t.team_name) === teamKey);
 
         if (!match) {
           setTeamRow(null);
